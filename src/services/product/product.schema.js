@@ -4,10 +4,11 @@ import paginate from 'mongoose-paginate-v2';
 const schema = new Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    phone: { type: String, required: true },
-    role: { type: String, required: true },
+    description: { type: String, required: true },
+    price: { type: Number, required: true },
+    from: { type: String, required: true },
+    whereToBuy: { type: String, required: true },
+    develeryTime: { type: String, required: true },
   },
   { timestamps: true }
 );
@@ -18,9 +19,7 @@ schema.methods.toJSON = function () {
   delete obj.__v;
   delete obj.createdAt;
   delete obj.updatedAt;
-  delete obj.password;
-  delete obj.notifySubs;
-  return JSON.parse(JSON.stringify(obj).replace(/_id/g, 'id'));
+  return JSON.parse(JSON.stringify(obj));
 };
 
-export default model('User', schema);
+export default model('product', schema);

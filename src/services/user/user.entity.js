@@ -5,9 +5,9 @@ import User from './user.schema';
 /**
  * these are the set to validate the request body or query.
  */
-const createAllowed = new Set(['firstName', 'lastName', 'userName', 'email', 'password', 'role', 'gender', 'workingDays', 'dob', 'workingHours', 'maxProjectLimit', 'skillsets', 'status']);
-const allowedQuery = new Set(['firstName', 'lastName', 'username', 'page', 'limit', 'id', 'paginate', 'role']);
-const ownUpdateAllowed = new Set(['firstName', 'lastName', 'phone', 'avatar', 'passwordChange', 'data']);
+const createAllowed = new Set(['name', 'description', 'password','phone','role']);
+const allowedQuery = new Set(['name',  'page', 'limit', 'id', 'paginate', 'role']);
+const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange', 'data']);
 
 /**
  * Creates a new user in the database with the specified properties in the request body.
@@ -19,21 +19,23 @@ const ownUpdateAllowed = new Set(['firstName', 'lastName', 'phone', 'avatar', 'p
  * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
  */
 export const register = ({ db }) => async (req, res) => {
+
   try {
+
     const valid = Object.keys(req.body).every(k => createAllowed.has(k));
     if (!valid) return res.status(400).send('Bad request');
     req.body.password = await bcrypt.hash(req.body.password, 8);
-    // const user = await db.create({ table: User, key: { ...req.body } });
-    db.create({ table: User, key: { ...req.body, remainigTime: req?.body?.workingHours } })
+    db.create({ table: User, key: { ...req.body} })
       .then(async user => {
+        if (!user) {
+          return res.status(400).send({ message: 'Email Already Exist' });
+        }
         await db.save(user);
         res.status(200).send(user);
       })
       .catch(({ message }) => res.status(400).send({ message }));
 
-    // if (!user) return res.status(400).send('Bad request');
-    // await db.save(user);
-    // return res.status(200).send(user);
+
   }
   catch (e) {
     console.log(e);
@@ -50,6 +52,8 @@ export const register = ({ db }) => async (req, res) => {
  * @returns It returns the data for success response. Otherwise it will through an error.
  */
 export const login = ({ db, settings }) => async (req, res) => {
+
+
   try {
     if (!req.body.email || !req.body.password) return res.status(400).send('Bad requests');
     const user = await db.findOne({ table: User, key: { email: req.body.email } });
