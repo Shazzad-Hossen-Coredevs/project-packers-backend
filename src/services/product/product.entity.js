@@ -65,3 +65,32 @@ export const getProducts = ({ db }) => async (req, res) => {
     res.status(500).send('Something went wrong.');
   }
 };
+/**
+ * Creates a new product in the database with the specified properties in the request body.
+ *
+ * @param {Object} req - The request object containing the properties for the new user.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
+export const getSingleProduct = ({ db }) => async (req, res) => {
+
+  try {
+
+    db.findOne({ table: Product, key:{id: req.params.id} })
+      .then(async (product) => {
+        if (!product) {
+          return res.status(400).send({ error:true, message: 'Product not found' });
+        }
+
+        res.status(200).send(product);
+      })
+      .catch(({ message }) => res.status(400).send({ message }));
+
+
+  }
+  catch (e) {
+    console.log(e);
+    res.status(500).send('Something went wrong.');
+  }
+};
