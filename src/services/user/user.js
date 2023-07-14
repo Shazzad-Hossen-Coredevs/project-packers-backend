@@ -1,5 +1,5 @@
 import { auth, checkRole } from '../middlewares';
-import { getAll, login, logout, me, register, remove, updateOwn, updateUser, userProfile } from './user.entity';
+import { generateOtp, getAll, login, logout, me, register, remove, resetPassword, updateOwn, updateUser, userProfile } from './user.entity';
 
 export default function user() {
 
@@ -9,6 +9,18 @@ export default function user() {
   * @response {Object} 200 - the new user.
   */
   this.route.post('/user', register(this));
+  /**
+  * POST /user
+  * @description This route is used to generate otp.
+  * @response {Object} 200 - otp.
+  */
+  this.route.post('/user/otp', generateOtp(this));
+  /**
+  * POST /user/otp
+  * @description This route is used to reset password.
+  * @response {Object} 200 - Acknowledgement.
+  */
+  this.route.post('/user/resetpass', resetPassword(this));
 
   /**
   * POST /user/login

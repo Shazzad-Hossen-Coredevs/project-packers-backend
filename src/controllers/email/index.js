@@ -2,7 +2,7 @@ import NewTransport from './transport';
 
 export default function NewMailer(options) {
   const transport = new NewTransport(options);
-  console.log('=> Mail service started!');
+  console.log('=> Mail service started! ');
 
   /**
    * Sends Email

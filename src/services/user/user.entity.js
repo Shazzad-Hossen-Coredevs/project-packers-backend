@@ -2,12 +2,15 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from './user.schema';
 
+
+
+
 /**
  * these are the set to validate the request body or query.
  */
 const createAllowed = new Set(['name', 'description', 'password','phone','role']);
 const allowedQuery = new Set(['name',  'page', 'limit', 'id', 'paginate', 'role']);
-const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange', 'data']);
+const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange', 'data','otp']);
 
 /**
  * Creates a new user in the database with the specified properties in the request body.
@@ -76,6 +79,85 @@ export const login = ({ db, settings }) => async (req, res) => {
     res.status(500).send('Something went wrong');
   }
 };
+/**
+ * This function is used for login a user.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
+export const generateOtp = ({ settings,mail }) => async (req, res) => {
+
+
+
+  try {
+    const otp = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    if (req.body.email) {
+      const token = jwt.sign(
+        {
+          otp: otp,
+          time: new Date(),
+        },
+        settings.secret
+      );
+
+
+      const result =  await mail({
+        receiver:req.body.email,
+        subject:'Project Packers - Password Reset OTP',
+        body:otp,
+        type:'text',
+      });
+      console.log(result);
+      res.status(200).send({ token: token });
+
+
+    }
+    else {
+      res.status(400).send({ error: true, message: 'Something wents wrong' });
+    }
+
+
+
+
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send('Something went wrong');
+  }
+};
+
+/**
+ * This function is used for reset password.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
+export const resetPassword = ({ db }) => async (req, res) => {
+
+
+
+  try {
+    if (req.body.newPassword && req.body.email) {
+      const user = await db.findOne({ table: User, key: { email: req.body.email } });
+      user.password = await bcrypt.hash(req.body.newPassword, 8);
+      const result = await db.save(user);
+      if (result)
+        res.status(200).send({ acknowledgement: true, message: 'Password reset Successfull' });
+      else res.status(400).send({ error: true, message: 'Operation unsuccessfull' });
+
+    }
+    else {
+      res.status(400).send({ error: true, message: 'Bad Request' });
+    }
+
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send('Something went wrong');
+  }
+};
+
+
 
 
 /**
