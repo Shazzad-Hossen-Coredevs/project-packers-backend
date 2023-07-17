@@ -5,12 +5,13 @@ import User from './user.schema';
 
 
 
+
 /**
  * these are the set to validate the request body or query.
  */
-const createAllowed = new Set(['name', 'description', 'password','phone','role']);
+const createAllowed = new Set(['name', 'email', 'password','phone','role','avatar']);
 const allowedQuery = new Set(['name',  'page', 'limit', 'id', 'paginate', 'role']);
-const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange', 'data','otp']);
+const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange']);
 
 /**
  * Creates a new user in the database with the specified properties in the request body.
@@ -83,7 +84,7 @@ export const login = ({ db, settings }) => async (req, res) => {
  * This function is used for login a user.
  * @param {Object} req This is the request object.
  * @param {Object} res this is the response object
- * @returns It returns the data for success response. Otherwise it will through an error.
+ * @returns It returns encrypted token as success response and otp on the mail. Otherwise it will through an error.
  */
 export const generateOtp = ({ settings,mail }) => async (req, res) => {
 
@@ -101,13 +102,12 @@ export const generateOtp = ({ settings,mail }) => async (req, res) => {
       );
 
 
-      const result =  await mail({
+      await mail({
         receiver:req.body.email,
         subject:'Project Packers - Password Reset OTP',
         body:otp,
         type:'text',
       });
-      console.log(result);
       res.status(200).send({ token: token });
 
 
@@ -125,21 +125,59 @@ export const generateOtp = ({ settings,mail }) => async (req, res) => {
     res.status(500).send('Something went wrong');
   }
 };
-
 /**
- * This function is used for reset password.
- * @param {Object} req This is the request object.
+ * This function is used for login a user.
+ * @param {Object} req This is the request object.In request body it will receive object {otp, token}
  * @param {Object} res this is the response object
- * @returns It returns the data for success response. Otherwise it will through an error.
+ * @returns It returns the encrypted token as success response. Otherwise it will through an error.
  */
-export const resetPassword = ({ db }) => async (req, res) => {
+export const verifyOtp = ({ settings }) => async (req, res) => {
 
 
 
   try {
-    if (req.body.newPassword && req.body.email) {
+    console.log(req.body);
+    const data = await jwt.verify(req.body.token, settings.secret);
+    if (data.otp === req.body.otp) {
+      const timeDifference = Math.abs((new Date() )- (new Date(data.time)));
+      if (!(timeDifference > 300000)) {
+        const token = jwt.sign({ otp: req.body.otp, time: new Date() }, settings.secret);
+        res.status(200).send({token});
+      }
+      else {
+        res.status(400).send({ error: true, message: 'Verification time out' });
+      }
+
+    }
+    else res.status(400).send({ error: true, message: 'Invalid Otp' });
+
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).send('Something went wrong');
+  }
+};
+
+
+/**
+ * This function is used for reset password.
+ * @param {Object} req This is the request object{otp, email, token, password}.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
+export const resetPassword = ({ db,settings }) => async (req, res) => {
+  try {
+    if (req.body.password && req.body.email && req.body.token) {
+      const data = jwt.verify(req.body.token, settings.secret);
+      const timeDifference = Math.abs(new Date() - new Date(data.time));
+      if (timeDifference > timeDifference) {
+        return res.status(400).send({ error: true, message: 'Request time out' });
+      }
+      else if (data.otp !== req.body.otp) {
+        return res.status(400).send({ error: true, message: 'Unauthorized Access' });
+      }
       const user = await db.findOne({ table: User, key: { email: req.body.email } });
-      user.password = await bcrypt.hash(req.body.newPassword, 8);
+      user.password = await bcrypt.hash(req.body.password, 8);
       const result = await db.save(user);
       if (result)
         res.status(200).send({ acknowledgement: true, message: 'Password reset Successfull' });
@@ -253,7 +291,9 @@ const setPassword = async ({ oldPass, newPass, user }) => {
  * @returns It returns the updated data.
  */
 export const updateOwn = ({ db, imageUp }) => async (req, res) => {
+
   try {
+
     if (req.files?.avatar?.path) {
       req.body = JSON.parse(req.body.data || '{}');
       req.body.avatar = await imageUp(req.files?.avatar.path);

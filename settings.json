@@ -5,9 +5,10 @@
   "SMTP_HOST": "smtp.gmail.com",
   "SMTP_PORT": "465",
   "SMTP_USER": "shazzad.coredevs@gmail.com",
-  "SMTP_PASSWORD": "LogitechG402",
+  "SMTP_PASSWORD": "qsqjfpijpuesmoaf",
   "EMAIL_NAME": "shazzad.coredevs@gmail.com",
   "EMAIL_FROM": "shazzad.coredevs@gmail.com",
   "MONGODB_URL": "mongodb+srv://shazzadhossen:McfoYCLO9ngu6xO3@cluster0.s2lhhrj.mongodb.net/?retryWrites=true&w=majority",
-  "secret": "5TXag!mSF:*sdF2V/HJ&XV<|l1R-YWc@,qSH+9@[IC?HiJ>#`~JfRjfhwNjyGk5TXag!mSF:*sdF2V/HJ&XV<|l1R-YWc@,qSH+9@[IC?HiJ>#`~JfRjfhwNjyGk5TXag!mSF:*sdF2V/HJ&XV<|l1R-YWc@,qSH+9@[ICHiJ>#`~JfRjfhwNjyGk5TXag!mSF:*sdF2V/HJ&XV<|l1R-YWc@,qSH+9@[IC?HiJ>#`~Jf|RjfhwNjyGk"
+  "secret": "coredevs"
+
 }

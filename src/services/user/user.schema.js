@@ -8,7 +8,7 @@ const schema = new Schema(
     password: { type: String, required: true },
     phone: { type: String, required: true },
     role: { type: String, required: true },
-    otp: { type: String },
+    avatar: { type: String },
   },
   { timestamps: true }
 );

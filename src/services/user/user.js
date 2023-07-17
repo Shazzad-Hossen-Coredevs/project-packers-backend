@@ -1,5 +1,5 @@
 import { auth, checkRole } from '../middlewares';
-import { generateOtp, getAll, login, logout, me, register, remove, resetPassword, updateOwn, updateUser, userProfile } from './user.entity';
+import { generateOtp, getAll, login, logout, me, register, remove, resetPassword, updateOwn, updateUser, userProfile, verifyOtp } from './user.entity';
 
 export default function user() {
 
@@ -12,9 +12,15 @@ export default function user() {
   /**
   * POST /user
   * @description This route is used to generate otp.
-  * @response {Object} 200 - otp.
+  * @response {Object} 200 -token.
   */
   this.route.post('/user/otp', generateOtp(this));
+  /**
+  * POST /user
+  * @description This route is used to verify otp.
+  * @response {Object} 200 -token.
+  */
+  this.route.post('/user/otp-verify', verifyOtp(this));
   /**
   * POST /user/otp
   * @description This route is used to reset password.
