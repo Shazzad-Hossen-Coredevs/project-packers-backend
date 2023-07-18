@@ -1,4 +1,4 @@
-import { addProduct, deleteProduct, getProducts, getSingleProduct, updateProduct } from './product.entity';
+import { addProduct, deleteProduct, getProducts, getSingleProduct, requestProduct, updateProduct } from './product.entity';
 
 export default function product() {
   /**
@@ -36,4 +36,5 @@ export default function product() {
    * @response {oblect} - acknowledgement true.
    */
   this.route.delete('/product/:id', deleteProduct(this));
+  
 }

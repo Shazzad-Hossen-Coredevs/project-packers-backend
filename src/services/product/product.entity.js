@@ -1,5 +1,5 @@
 import Product from './product.schema';
-const createAllowed = new Set(['name', 'desc', 'price','from','whereToBuy','develeryTime','thumbnails','category','subCategory']);
+const createAllowed = new Set(['name', 'desc', 'price','from','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity']);
 const allowedQuery = new Set(['page', 'limit', '_id', 'paginate']);
 const ownUpdateAllowed = new Set(['name', 'desc', 'price','from','whereToBuy','develeryTime','thumbnails','category','subCategory','_id']);
 

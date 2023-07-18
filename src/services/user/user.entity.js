@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from './user.schema';
+import Product from '../product/product.schema'
 
 
 
@@ -60,7 +61,7 @@ export const login = ({ db, settings }) => async (req, res) => {
 
   try {
     if (!req.body.email || !req.body.password) return res.status(400).send('Bad requests');
-    const user = await db.findOne({ table: User, key: { email: req.body.email } });
+    const user = await db.findOne({ table: User, key: { email: req.body.email,populate:{path:'cart.product'} } });
     if (!user) return res.status(401).send('Unauthorized');
     const isValid = await bcrypt.compare(req.body.password, user.password);
     if (!isValid) return res.status(401).send('Unauthorized');
@@ -352,4 +353,55 @@ export const remove = ({ db }) => async (req, res) => {
     console.log(err);
     res.status(500).send({ message: 'Something went wrong' });
   }
+};
+/**
+ * This function is used to add item to cart of an user collection.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the updated data.
+ */
+export const addTocart = ({ db }) => async (req, res) => {
+  try {
+    const product = await db.findOne({ table: Product, key: { id: req.body.productId } });
+    if (!product) return res.status(400).send({ error: true, message: 'Product not Found' });
+    const cartItem = req.user.cart.find(item => item.product.equals(req.body.productId,));
+    if (cartItem) {
+      cartItem.quantity += req.body.quantity;
+    } else {
+      req.user.cart.push({ product: req.body.productId, quantity: req.body.quantity });
+    }
+    db.save(req.user);
+    res.status(200).send({ acknowledgement :true,message:'Successfully added to cart'});
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ message: 'Something went wrong' });
+  }
+};
+/**
+ * This function is used to Update cart item of an user collection.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the updated data.
+ */
+export const updateCart = ({db}) => async (req, res) => {
+
+  try {
+    req.user.cart.pop();
+    for (let i = 0; i < req.body.cart.length; i++){
+      if (req.body.cart[i].quantity < 1) continue;
+      req.user.cart.push({
+        product: req.body.cart[i].productId,
+        quantity: req.body.cart[i].quantity,
+      });
+    }
+    db.save(req.user);
+    res.status(200).send(req.user);
+
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ message: 'Something went wrong' });
+  }
+
 };

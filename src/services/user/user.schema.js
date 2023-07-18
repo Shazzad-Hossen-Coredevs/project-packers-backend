@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
 const schema = new Schema(
@@ -9,6 +9,10 @@ const schema = new Schema(
     phone: { type: String, required: true },
     role: { type: String, required: true },
     avatar: { type: String },
+    cart: [{
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
+      quantity: { type: Number, default: 1 },
+    }],
   },
   { timestamps: true }
 );
