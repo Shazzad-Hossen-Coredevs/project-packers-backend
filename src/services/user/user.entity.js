@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from './user.schema';
-import Product from '../product/product.schema'
+import Product from '../product/product.schema';
 
 
 

@@ -9,10 +9,18 @@ const schema = new Schema(
     phone: { type: String, required: true },
     role: { type: String, required: true },
     avatar: { type: String },
-    cart: [{
-      product: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
-      quantity: { type: Number, default: 1 },
-    }],
+    cart: [
+      {
+        product: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
+        quantity: { type: Number, default: 1 },
+      },
+    ],
+    shippingAddress: {
+      address: { type: String },
+      city: { type: String },
+      area: { type: String },
+      zip: { type: String },
+    },
   },
   { timestamps: true }
 );
