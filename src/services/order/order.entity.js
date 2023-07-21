@@ -1,5 +1,4 @@
 import Order from './order.schema';
-import User from '../user/user.schema';
 import Discount from '../discount/discount.schema';
 /**
  * Creates new order in the database based on the property of request body.
@@ -12,51 +11,92 @@ import Discount from '../discount/discount.schema';
 export const addOrder = ({ db }) => async (req, res) => {
 
   try {
-
-    req.body.status = 'pending';
-    req.body.user = req.user.id;
-    const user = await db.findOne({ table: User, key: { id: req.user.id } });
-    if (!user) return res.status(400).send({ error: true, message: 'Please login first' });
-    user.shippingAddress = req.body.shippingAddress;
-    db.save(user);
+    if (!paramsValidator(req.body, ['shipping', 'contact', 'shippingAddress'])) return res.status(400).send({ error: true, message: ' body objectmust have shipping, contact, shippingAddress' });
+    if (!paramsValidator(req.body.contact, ['email', 'phone'])) return res.status(400).send({ error: true, message: 'contact object must have email and phone' });
+    if (!req.body.contact.phone.primary) return res.status(400).send({ error: true, message: 'Primary phone number missing in contact information' });
     if (req.body.code) {
-      const discount = await db.findOne({
-        table: Discount,
-        key: { code: req.body.code },
-      });
-      if (!discount) return res.status(400).send({ eror: true, message: 'Invalid Discount code' });
-      if ((discount.expiresIn - new Date()) < 0)
-        return res.status(400).send({ error: true, message: 'Discount code is already expired' });
-      const isFound = discount.user.find((user) => user.id === req.body.userId);
-      if (isFound)
-        return res.status(400).send({ error: true, message: 'You already applied this discount code before' });
+      const discount = await db.findOne({ table: Discount, key: { code: req.body.code } });
+      if (!discount) return res.status(400).send({ error: true, message: ' Invalid discount code' });
+      if ((discount.expiresIn - new Date()) < 0) return res.status(400).send({ error: true, message: 'Discount code is already expired' });
+      const isFound = discount.user.find((user) => user=== req.user.id);
+      if (isFound) return res.status(400).send({ error: true, message: 'You already applied this discount code before' });
       req.discount = discount;
-    }
-    const order = await db.create({ table: Order, key: { ...req.body } });
-    if (!order) return res.status(400).send({ error: true, message: 'Order failed' });
-    const result = await db.findOne({ table: Order, key: { id: order._id, populate: { path: 'products.pId' } } });
-    let dTotal = 0;
-    let nTotal = 0;
-    for (let i = 0; i < result.products.length; i++){
-      if (result.products[i].pId.category === req.discount.category || result.products[i].pId.subCategory === req.discount.subCategory) {
-        dTotal += result.products[i].pId.price;
-      }
-      nTotal += result.products[i].pId.price;
 
     }
+
+
+    if (!req.body.shippingAddress) return res.status(400).send({ error: true, message: 'Shipping address missing in request body' });
+    const isValid = paramsValidator(req.body.shippingAddress,['name', 'address', 'city', 'area', 'zip']);
+    if (!isValid) return res.status(400).send({ error: true, message: 'Invalid shipping address' });
+
+
+    req.user.shippingAddress = req.body.shippingAddress;
+    let dTotal = 0, nTotal = 0;
+    req.user.cart.forEach(prod => {
+      req.discount &&
+      prod.product.category === req.discount.category &&
+      prod.product.subCategory === req.discount.subCategory
+        ? (dTotal += prod.product.price * prod.quantity)
+        : (nTotal += prod.product.price * prod.quantity);
+    });
+
     if (req.discount) {
-      if (req.discount.type === 'f')
-        dTotal -= req.discount.amount;
-      else if (req.discount.type === 'p') {
-        dTotal -= (dTotal * req.discount.amount) / 100;
-      }
+      req.discount.type==='p'? req.body.subTotal= ((dTotal*(100-req.discount.amount))/100)+nTotal: req.discount.type==='f'? req.body.subTotal=(dTotal-req.discount.amount)+nTotal:req.body.subTotal = dTotal + nTotal;
     }
-    result.totalAmount = dTotal + nTotal;
-    db.save(result);
-    res.send(result);
+
+    else req.body.subTotal = dTotal + nTotal;
+    if (req.body.shipping === 'inside') req.body.shippingAmount = 99;
+    else if (req.body.shipping === 'outside') req.body.shippingAmount = 150;
+    req.body.estimatedTotal = req.body.subTotal + req.body.shippingAmount;
+
+    const order = await db.create({
+      table: Order,
+      key: { ...req.body, products: req.user.cart , user: req.user.id, status:'pending'},
+    });
+
+
+    if (!order) return res.status(400).send({ error: true, message: 'Order creation failed' });
+    if (req.discount) {
+      req.discount.user.push(req.user.id);
+      db.save(req.discount);
+    }
+
+    req.user.cart=[];
+    db.save(req.user);
+
+    res.status(200).send(order);
+
+
+
   }
   catch (e) {
     console.log(e);
     res.status(500).send('Something went wrong.');
   }
+};
+export const paramsValidator = (data, requiredKeys) => {
+  for (const key of requiredKeys) {
+    if (!(key in data)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+export const getOrders = ({ db }) => async (req, res) => {
+  try {
+    const orders = await db.find({
+      table: Order,
+      key: {
+        populate: { path: 'user products.product', select:'name email phone avatar shippingAddress _id  thumbnails desc price from whereToBuy category subCategory ' } },
+    });
+    if (!orders) return res.status(200).send({ error: true, mesage: 'Failed to fetch data' });
+    res.status(200).send(orders);
+
+  } catch (e) {
+    console.log(e);
+    res.status(500).send('Something went wrong.');
+  }
+
 };

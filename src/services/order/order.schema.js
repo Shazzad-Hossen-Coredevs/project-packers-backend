@@ -4,10 +4,10 @@ import paginate from 'mongoose-paginate-v2';
 const schema = new Schema(
   {
     status: { type: String, required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     products: [
       {
-        pId: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
+        product: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
         quantity: { type: Number, required: true },
       },
     ],
@@ -27,7 +27,10 @@ const schema = new Schema(
       zip: { type: String, required: true },
       dlInstruction: { type: String },
     },
-    totalAmount: { type: Number}
+    shipping: { type: String, required: true },
+    shippingAmount: { type: Number, required: true },
+    subTotal: { type: Number, required: true },
+    estimatedTotal: { type: Number, required: true },
   },
   { timestamps: true }
 );

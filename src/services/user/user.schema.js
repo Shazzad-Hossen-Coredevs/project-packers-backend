@@ -11,7 +11,7 @@ const schema = new Schema(
     avatar: { type: String },
     cart: [
       {
-        product: { type: mongoose.Schema.Types.ObjectId, ref: "product" },
+        product: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
         quantity: { type: Number, default: 1 },
       },
     ],

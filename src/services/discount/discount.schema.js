@@ -11,11 +11,7 @@ const schema = new Schema(
     type: { type: String, required: true },
     limit: { type: Number, required: true },
     expiresIn: { type: Date, required: true },
-    user: [
-      {
-        id: { type: String, required: true }
-      },
-    ],
+    user: { type: Array}
   },
   { timestamps: true }
 );
