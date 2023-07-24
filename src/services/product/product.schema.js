@@ -4,6 +4,7 @@ import paginate from 'mongoose-paginate-v2';
 const schema = new Schema(
   {
     name: { type: String, required: true },
+    status: { type: String, required: true },
     thumbnails: { type: Array, required: true },
     desc: { type: String, required: true },
     price: { type: Number, required: true },

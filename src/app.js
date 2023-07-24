@@ -84,6 +84,7 @@ export default class App {
     this.express.use(parse()); // Parse Form data as JSON
     this.express.use('/api', limiter, this.router); // All the API routes
     this.express.use(express.static(path.resolve(__dirname, '..', 'client'))); // REACT build files (Statics)
+    // this.express.use('/images', express.static('images'));
 
     if (this.config.useHTTP2) {
       // SSL configuration

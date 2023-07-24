@@ -8,8 +8,9 @@ const schema = new Schema(
     quantity: { type: String, required: true },
     notes: { type: String },
     thumbnails: { type: Array, required: true },
-    status:{ type: String, required:true}
-
+    status: { type: String, required: true },
+    tax: { type: Number},
+    fee: { type: Number}
   },
   { timestamps: true }
 );

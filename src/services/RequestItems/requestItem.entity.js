@@ -2,7 +2,7 @@ import RequestItem from './requestItem.schema';
 
 const createAllowed = new Set(['name', 'whereToBuy', 'quantity', 'thumbnails', 'notes', 'email','status']);
 const allowedQuery = new Set(['page', 'limit', '_id', 'paginate']);
-const updateAllowed = new Set(['name', 'whereToBuy', 'quantity', 'thumbnails', 'notes', 'email','status']);
+const updateAllowed = new Set(['name', 'whereToBuy', 'quantity', 'thumbnails', 'notes', 'email','status','tax','fee']);
 /**
  * This function is used for Request a new product which will add a collection in table RequestItems.
  * @param {Object} req This is the request object.
@@ -89,16 +89,9 @@ export const getSingleProduct = ({ db }) => async (req, res) => {
  */
 export const updateProduct = ({ db }) => async (req, res) => {
   try {
-    if (!req.body.status) return res.status(400).send({ error: true, message: 'status missing in body' });
-    await db.findOne({ table: RequestItem, key: { id: req.params.id } })
-      .then(async (product) => {
-        if (!product) return res.status(400).send({ error: true, message: 'Product not found' });
-        product.status=req.body.status;
-        db.save(product);
-        res.status(200).send({ acknowledgment: true ,message:'Produt status updated successfully'});
-
-      })
-      .catch(({ message }) => res.status(400).send({ message }));
+    const data = await db.update({ table: RequestItem, key: { id: req.params.id, body: req.body } });
+    if (!data) return res.status(400).send({ error: true, message: 'Operation failed' });
+    res.status(200).send(data);
 
   } catch (e) {
     console.log(e);

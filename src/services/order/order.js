@@ -1,5 +1,5 @@
 import { auth } from '../middlewares';
-import { addOrder, deleteOrder, getOrders, myOrder, singleOrder, updateOrderstatus } from './order.entity';
+import { addOrder, deleteOrder, getOrders, myOrder, singleOrder, updateOrderstatus, userOrder } from './order.entity';
 
 export default function order() {
   /**
@@ -16,6 +16,13 @@ export default function order() {
    * @response {oblect} - acknowledgement true.
    */
   this.route.get('/order', auth, getOrders(this));
+  /**
+   * GET /a user order
+   * @description This route is used to get all  order details.
+   * @request {Object} -product details object.
+   * @response {oblect} - acknowledgement true.
+   */
+  this.route.get('/order/user/:id',auth, userOrder(this));
   /**
    * GET /myorder
    * @description This route is used to get all  order details.

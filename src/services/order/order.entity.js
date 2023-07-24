@@ -185,7 +185,13 @@ export const myOrder = ({ db }) => async (req, res) => {
     res.status(500).send('Something went wrong.');
   }
 };
-
+/**
+ * Fatch a specific order details
+ * @param {Object} req - This is the request object.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} Orders  collections
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const singleOrder = ({ db }) => async (req, res) => {
   try {
 
@@ -199,3 +205,21 @@ export const singleOrder = ({ db }) => async (req, res) => {
   }
 
 };
+/**
+ * Fatch a specific user orders
+ * @param {Object} req - This is the request object.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} Orders  collections
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
+
+export const userOrder = ({ db }) => async (req, res) => {
+  try {
+
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Something went wrong.');
+
+  }
+}

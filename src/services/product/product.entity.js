@@ -1,6 +1,6 @@
 import Product from './product.schema';
-const createAllowed = new Set(['name', 'desc', 'price','from','actualPrice','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity','productLink']);
-const allowedQuery = new Set(['page', 'limit', '_id', 'paginate']);
+const createAllowed = new Set(['name', 'desc', 'price','from','actualPrice','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity','productLink','status']);
+const allowedQuery = new Set(['page', 'limit', '_id', 'paginate','status']);
 const ownUpdateAllowed = new Set(['name', 'desc', 'price','from','actualPrice','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity','productLink']);
 
 
@@ -34,8 +34,8 @@ export const addProduct = ({ db, imageUp }) => async (req, res) => {
         if (!product) {
           return res.status(400).send({ message: 'Something Wents Wrong' });
         }
-        await db.save(product);
-        res.status(200).send({ acknowledgment: true });
+        const data = await db.save(product);
+        res.status(200).send(data);
       })
       .catch(({ message }) => res.status(400).send({ message }));
 
