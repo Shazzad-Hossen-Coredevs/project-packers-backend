@@ -1,7 +1,7 @@
 import Product from './product.schema';
-const createAllowed = new Set(['name', 'desc', 'price','from','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity']);
+const createAllowed = new Set(['name', 'desc', 'price','from','actualPrice','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity','productLink']);
 const allowedQuery = new Set(['page', 'limit', '_id', 'paginate']);
-const ownUpdateAllowed = new Set(['name', 'desc', 'price','from','whereToBuy','develeryTime','thumbnails','category','subCategory','_id']);
+const ownUpdateAllowed = new Set(['name', 'desc', 'price','from','actualPrice','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity','productLink']);
 
 
 /**
@@ -28,7 +28,8 @@ export const addProduct = ({ db, imageUp }) => async (req, res) => {
     }
     const valid = Object.keys(req.body).every(k => createAllowed.has(k));
     if (!valid) return res.status(400).send('Bad request');
-    db.create({ table: Product, key: { ...req.body} })
+    const whereToBuy = new URL(req.body.productLink).hostname.replace(/^www\./, '');
+    db.create({ table: Product, key: { ...req.body, whereToBuy} })
       .then(async product => {
         if (!product) {
           return res.status(400).send({ message: 'Something Wents Wrong' });

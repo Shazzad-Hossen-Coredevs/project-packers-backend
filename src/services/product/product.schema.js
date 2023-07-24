@@ -7,9 +7,14 @@ const schema = new Schema(
     thumbnails: { type: Array, required: true },
     desc: { type: String, required: true },
     price: { type: Number, required: true },
+    actualPrice: { type: Number, required: true },
+    productLink: { type: String, required: true },
     from: { type: String, required: true },
     whereToBuy: { type: String, required: true },
-    develeryTime: { type: String, required: true },
+    develeryTime: {
+      min: { type: Number, required: true },
+      max: { type: Number, required: true }
+    },
     category: { type: String, required: true },
     subCategory: { type: String, required: true },
   },

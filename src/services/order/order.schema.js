@@ -6,6 +6,11 @@ const schema = new Schema(
     orderNumber: { type: Number, required: true },
     status: { type: String, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    estimatedDtime: {
+      min: { type: Date, required: true },
+      max: { type: Date, retuired: true },
+
+    },
     products: [
       {
         product: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
