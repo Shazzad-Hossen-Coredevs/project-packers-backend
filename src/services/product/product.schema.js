@@ -4,7 +4,8 @@ import paginate from 'mongoose-paginate-v2';
 const schema = new Schema(
   {
     name: { type: String, required: true },
-    status: { type: String, required: true },
+    status: { type: String, enum:['pending', 'active', 'archived', 'draft'], default: 'pending' },
+    stock: { type: Number, required: true },
     thumbnails: { type: Array, required: true },
     desc: { type: String, required: true },
     price: { type: Number, required: true },
@@ -16,6 +17,8 @@ const schema = new Schema(
       min: { type: Number, required: true },
       max: { type: Number, required: true }
     },
+    tax: { type: Number, default: 0 },
+    fee: { type: Number, default: 0 },
     category: { type: String, required: true },
     subCategory: { type: String, required: true },
   },

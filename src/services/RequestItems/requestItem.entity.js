@@ -99,3 +99,19 @@ export const updateProduct = ({ db }) => async (req, res) => {
   }
 
 };
+
+
+export const sendInvoice = ({ db }) => async (req, res) => {
+  try {
+    //send user an invoice by mail with a link which carries a token. token has user id and request item id;
+    // when user accept this and api hit trigered and this product will be added to product list and also added to user cart.
+    //and set the status of requested item accepted. if user canceled the invoice the status will be abandoned.
+    //then admin can change the status to closed.
+    // then further process will be continued as normal order.
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Something wents wrong');
+
+  }
+}
