@@ -1,7 +1,8 @@
 import Order from './order.schema';
 import Discount from '../discount/discount.schema';
 
-const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shipping','cancel']);
+
+const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shipping', 'cancel']);
 /**
  * Creates new order in the database based on the property of request body.
  *
@@ -21,18 +22,18 @@ export const addOrder = ({ db }) => async (req, res) => {
       const discount = await db.findOne({ table: Discount, key: { code: req.body.code } });
       if (!discount) return res.status(400).send({ error: true, message: ' Invalid discount code' });
       if ((discount.expiresIn - new Date()) < 0) return res.status(400).send({ error: true, message: 'Discount code is already expired' });
-      const isFound = discount.user.find((user) => user=== req.user.id);
+      const isFound = discount.user.find((user) => user === req.user.id);
       if (isFound) return res.status(400).send({ error: true, message: 'You already applied this discount code before' });
       req.discount = discount;
 
     }
     if (!req.body.shippingAddress) return res.status(400).send({ error: true, message: 'Shipping address missing in request body' });
-    const isValid = paramsValidator(req.body.shippingAddress,['name', 'address', 'city', 'area', 'zip']);
+    const isValid = paramsValidator(req.body.shippingAddress, ['name', 'address', 'city', 'area', 'zip']);
     if (!isValid) return res.status(400).send({ error: true, message: 'Invalid shipping address' });
     req.user.shippingAddress = req.body.shippingAddress;
     let dTotal = 0, nTotal = 0;
     let estimatedDtime = {
-      min:0, max:0
+      min: 0, max: 0
     };
     req.user.cart.forEach(prod => {
       if (prod.product.develeryTime.max > estimatedDtime.max) {
@@ -42,8 +43,8 @@ export const addOrder = ({ db }) => async (req, res) => {
 
 
       req.discount &&
-      prod.product.category === req.discount.category &&
-      prod.product.subCategory === req.discount.subCategory
+        prod.product.category === req.discount.category &&
+        prod.product.subCategory === req.discount.subCategory
         ? (dTotal += prod.product.price * prod.quantity)
         : (nTotal += prod.product.price * prod.quantity);
     });
@@ -51,7 +52,7 @@ export const addOrder = ({ db }) => async (req, res) => {
     estimatedDtime.min = generateDate(estimatedDtime.min);
 
     if (req.discount) {
-      req.discount.type==='p'? req.body.subTotal= ((dTotal*(100-req.discount.amount))/100)+nTotal: req.discount.type==='f'? req.body.subTotal=(dTotal-req.discount.amount)+nTotal:req.body.subTotal = dTotal + nTotal;
+      req.discount.type === 'p' ? req.body.subTotal = ((dTotal * (100 - req.discount.amount)) / 100) + nTotal : req.discount.type === 'f' ? req.body.subTotal = (dTotal - req.discount.amount) + nTotal : req.body.subTotal = dTotal + nTotal;
     }
     else req.body.subTotal = dTotal + nTotal;
     if (req.body.shipping === 'inside') req.body.shippingAmount = 99;
@@ -61,14 +62,14 @@ export const addOrder = ({ db }) => async (req, res) => {
 
     const order = await db.create({
       table: Order,
-      key: { ...req.body, products: req.user.cart , user: req.user.id, status:'pending', estimatedDtime , populate: { path: 'products.product user', select: '_id shippingAddress name email phone avatar thumbnails price '}},
+      key: { ...req.body, products: req.user.cart, user: req.user.id, status: 'pending', estimatedDtime, populate: { path: 'products.product user', select: '_id shippingAddress name email phone avatar thumbnails price ' } },
     });
     if (!order) return res.status(400).send({ error: true, message: 'Order creation failed' });
     if (req.discount) {
       req.discount.user.push(req.user.id);
       db.save(req.discount);
     }
-    req.user.cart=[];
+    req.user.cart = [];
     db.save(req.user);
     res.status(200).send(order);
   }
@@ -107,7 +108,8 @@ export const getOrders = ({ db }) => async (req, res) => {
     const orders = await db.find({
       table: Order,
       key: {
-        populate: { path: 'user products.product', select:'name email phone avatar shippingAddress _id  thumbnails desc price from whereToBuy category subCategory ' } },
+        populate: { path: 'user products.product', select: 'name email phone avatar shippingAddress _id  thumbnails desc price from whereToBuy category subCategory ' }
+      },
     });
     if (!orders) return res.status(200).send({ error: true, mesage: 'Failed to fetch data' });
     res.status(200).send(orders);
@@ -158,7 +160,7 @@ export const deleteOrder = ({ db }) => async (req, res) => {
     const isFound = await db.findOne({ table: Order, key: { id: req.params.id } });
     if (!isFound) return res.status(400).send({ error: true, message: 'Order not Found' });
     isFound.remove();
-    res.status(200).send({ acknowledgement : true});
+    res.status(200).send({ acknowledgement: true });
 
 
   } catch (e) {
@@ -176,7 +178,7 @@ export const deleteOrder = ({ db }) => async (req, res) => {
  */
 export const myOrder = ({ db }) => async (req, res) => {
   try {
-    const orders = await db.find({ table: Order, key: { id: req.user.id ,populate: {path: 'products.product'} } });
+    const orders = await db.find({ table: Order, key: { id: req.user.id, populate: { path: 'products.product' } } });
     if (!orders) return res.status(400).send({ error: true, message: 'Failed to fatch data' });
     res.status(200).send(orders);
 
@@ -195,7 +197,7 @@ export const myOrder = ({ db }) => async (req, res) => {
 export const singleOrder = ({ db }) => async (req, res) => {
   try {
 
-    const order = await db.findOne({ table: Order, key: { id: req.params.id, populate: {path: 'products.product'}} });
+    const order = await db.findOne({ table: Order, key: { id: req.params.id, populate: { path: 'products.product' } } });
     if (!order) return res.send({ error: true, message: 'Something wents wrong!' });
     res.status(200).send(order);
 
@@ -215,11 +217,12 @@ export const singleOrder = ({ db }) => async (req, res) => {
 
 export const userOrder = ({ db }) => async (req, res) => {
   try {
+    const orders = await db.find({ table: Order, key: { id: req.params.id } });
+    res.send(orders);
 
-    
   } catch (error) {
     console.log(error);
     res.status(500).send('Something went wrong.');
 
   }
-}
+};

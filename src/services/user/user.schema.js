@@ -7,7 +7,14 @@ const schema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     phone: { type: String, required: true },
-    role: { type: String, required: true },
+    role: { type: String, enum: ['super-admin', 'admin', 'support', 'user'], default: 'user' },
+    access: {
+      type: [{
+        type: String,
+        enum: ['order', 'request', 'support', 'product']
+      }],
+      default: []
+    },
     avatar: { type: String },
     cart: [
       {

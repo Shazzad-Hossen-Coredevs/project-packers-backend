@@ -1,7 +1,8 @@
 import { auth, checkRole } from '../middlewares';
-import { addTocart, generateOtp, getAll, login, logout, me, register, remove, resetPassword, updateCart, updateOwn, updateUser, userProfile, verifyOtp } from './user.entity';
+import { addStaff, addTocart, generateOtp, getAll, login, logout, me, register, remove, resetPassword, updateCart, updateOwn, updateStaff, updateUser, userProfile, verifyOtp } from './user.entity';
 
 export default function user() {
+
 
   /**
   * POST /user
@@ -74,6 +75,12 @@ export default function user() {
 * @description this route is used to add item to cart.
 * @response {Object} 200 - the user.
 */this.route.patch('/user/cart', auth, updateCart(this));
+  /**
+  * PATCH /user/staff
+  * @description This route is used to create a staff.
+  * @response {Object} 200 - the new user.
+  */
+  this.route.patch('/user/staff', auth,checkRole(['admin','super-admin']), updateStaff(this));
 
   /**
   * PATCH ‘/user/:id’
@@ -93,5 +100,12 @@ export default function user() {
 * @description this route is used to add item to cart.
 * @response {Object} 200 - the user.
 */this.route.post('/user/cart', auth, addTocart(this));
+  /**
+  * POST /user/staff
+  * @description This route is used to create a staff.
+  * @response {Object} 200 - the new user.
+  */
+  this.route.post('/user/staff', auth, checkRole(['super-admin','admin']), addStaff(this));
+
 
 }

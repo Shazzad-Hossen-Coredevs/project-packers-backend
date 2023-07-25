@@ -10,8 +10,8 @@ import Product from '../product/product.schema';
 /**
  * these are the set to validate the request body or query.
  */
-const createAllowed = new Set(['name', 'email', 'password','phone','role','avatar']);
-const allowedQuery = new Set(['name',  'page', 'limit', 'id', 'paginate', 'role']);
+const createAllowed = new Set(['name', 'email', 'password', 'phone', 'role', 'avatar', 'shippingAddress']);
+const allowedQuery = new Set(['name', 'page', 'limit', 'id', 'paginate', 'role', 'sortBy', 'search']);
 const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange']);
 
 /**
@@ -26,11 +26,11 @@ const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange']);
 export const register = ({ db }) => async (req, res) => {
 
   try {
-
+    req.body.role = 'user';
     const valid = Object.keys(req.body).every(k => createAllowed.has(k));
     if (!valid) return res.status(400).send('Bad request');
     req.body.password = await bcrypt.hash(req.body.password, 8);
-    db.create({ table: User, key: { ...req.body} })
+    db.create({ table: User, key: { ...req.body } })
       .then(async user => {
         if (!user) {
           return res.status(400).send({ message: 'Email Already Exist' });
@@ -61,7 +61,7 @@ export const login = ({ db, settings }) => async (req, res) => {
 
   try {
     if (!req.body.email || !req.body.password) return res.status(400).send('Bad requests');
-    const user = await db.findOne({ table: User, key: { email: req.body.email,populate:{path:'cart.product'} } });
+    const user = await db.findOne({ table: User, key: { email: req.body.email, populate: { path: 'cart.product' } } });
     if (!user) return res.status(401).send('Unauthorized');
     const isValid = await bcrypt.compare(req.body.password, user.password);
     if (!isValid) return res.status(401).send('Unauthorized');
@@ -87,7 +87,7 @@ export const login = ({ db, settings }) => async (req, res) => {
  * @param {Object} res this is the response object
  * @returns It returns encrypted token as success response and otp on the mail. Otherwise it will through an error.
  */
-export const generateOtp = ({ settings,mail }) => async (req, res) => {
+export const generateOtp = ({ settings, mail }) => async (req, res) => {
 
 
 
@@ -104,10 +104,10 @@ export const generateOtp = ({ settings,mail }) => async (req, res) => {
 
 
       await mail({
-        receiver:req.body.email,
-        subject:'Project Packers - Password Reset OTP',
-        body:otp,
-        type:'text',
+        receiver: req.body.email,
+        subject: 'Project Packers - Password Reset OTP',
+        body: otp,
+        type: 'text',
       });
       res.status(200).send({ token: token });
 
@@ -140,10 +140,10 @@ export const verifyOtp = ({ settings }) => async (req, res) => {
     console.log(req.body);
     const data = await jwt.verify(req.body.token, settings.secret);
     if (data.otp === req.body.otp) {
-      const timeDifference = Math.abs((new Date() )- (new Date(data.time)));
+      const timeDifference = Math.abs((new Date()) - (new Date(data.time)));
       if (!(timeDifference > 300000)) {
         const token = jwt.sign({ otp: req.body.otp, time: new Date() }, settings.secret);
-        res.status(200).send({token});
+        res.status(200).send({ token });
       }
       else {
         res.status(400).send({ error: true, message: 'Verification time out' });
@@ -166,7 +166,7 @@ export const verifyOtp = ({ settings }) => async (req, res) => {
  * @param {Object} res this is the response object
  * @returns It returns the data for success response. Otherwise it will through an error.
  */
-export const resetPassword = ({ db,settings }) => async (req, res) => {
+export const resetPassword = ({ db, settings }) => async (req, res) => {
   try {
     if (req.body.password && req.body.email && req.body.token) {
       const data = jwt.verify(req.body.token, settings.secret);
@@ -371,7 +371,7 @@ export const addTocart = ({ db }) => async (req, res) => {
       req.user.cart.push({ product: req.body.productId, quantity: req.body.quantity });
     }
     db.save(req.user);
-    res.status(200).send({ acknowledgement :true,message:'Successfully added to cart'});
+    res.status(200).send({ acknowledgement: true, message: 'Successfully added to cart' });
 
   } catch (err) {
     console.log(err);
@@ -384,11 +384,11 @@ export const addTocart = ({ db }) => async (req, res) => {
  * @param {Object} res this is the response object
  * @returns It returns the updated data.
  */
-export const updateCart = ({db}) => async (req, res) => {
+export const updateCart = ({ db }) => async (req, res) => {
 
   try {
     req.user.cart.pop();
-    for (let i = 0; i < req.body.cart.length; i++){
+    for (let i = 0; i < req.body.cart.length; i++) {
       if (req.body.cart[i].quantity < 1) continue;
       req.user.cart.push({
         product: req.body.cart[i].productId,
@@ -404,4 +404,56 @@ export const updateCart = ({db}) => async (req, res) => {
     res.status(500).send({ message: 'Something went wrong' });
   }
 
+};
+/**
+ * This function is used to Create a Stuff
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the updated data.
+ */
+export const addStaff = ({ db }) => async (req, res) => {
+  try {
+    req.body.password = await bcrypt.hash('Coredevs#1234', 8);
+    const staff = await db.create({ table: User, key: { ...req.body } });
+    if (!staff) return res.status(400).send({ error: true, message: 'Staff creation unsuccessfull' });
+    res.status(200).send(staff);
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Something wents wrong');
+
+  }
+};
+
+export const updateStaff = ({ db }) => async (req, res) => {
+  try {
+    const data =await db.findOne({ table: User, key: { id:req.body.id ,body: req.body} });
+    if (!data) return res.status(400).send({ error: true, message: 'Operation failed' });
+    if (req.body.access) {
+      data.access = req.body.access;
+      
+    }
+    if (req.body.role) {
+      if (req.user.role === 'admin' && ((data.role === 'admin' || data.role === 'super-admin') || (req.body.role === 'admin' || req.body.role === 'super-admin'))) {
+        db.save(data);
+        return res.status(400).send({ error: true, message: 'You do not have permission to set this role to this user' });
+      }
+      data.role = req.body.role;
+      const result = await db.save(data);
+      res.status(200).send(result);
+
+    }
+    else {
+      const result = await db.save(data);
+      res.status(200).send(result);
+    }
+
+
+
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('something wents wrong');
+
+  }
 };
