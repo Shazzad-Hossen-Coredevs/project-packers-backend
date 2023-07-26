@@ -1,7 +1,7 @@
 import Product from './product.schema';
-const createAllowed = new Set(['name', 'desc', 'price','from','actualPrice','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity','productLink','status','stock']);
-const allowedQuery = new Set(['page', 'limit', '_id', 'paginate','status']);
-const ownUpdateAllowed = new Set(['name', 'desc', 'price','from','actualPrice','whereToBuy','develeryTime','thumbnails','category','subCategory','quantity','productLink']);
+const createAllowed = new Set(['name', 'desc', 'price', 'from', 'actualPrice', 'whereToBuy', 'develeryTime', 'thumbnails', 'category', 'subCategory', 'quantity', 'productLink', 'status', 'stock']);
+const allowedQuery = new Set(['page', 'limit', '_id', 'paginate', 'status']);
+const ownUpdateAllowed = new Set(['name', 'desc', 'price', 'from', 'actualPrice', 'whereToBuy', 'develeryTime', 'thumbnails', 'category', 'subCategory', 'quantity', 'productLink']);
 
 
 /**
@@ -19,7 +19,7 @@ export const addProduct = ({ db, imageUp }) => async (req, res) => {
       req.body = JSON.parse(req.body.data || '{}');
       if (req.files.thumbnails.length > 1) {
         for (let thumb of req.files.thumbnails) {
-          req.body.thumbnails = [...req.body.thumbnails ||[], (await imageUp(thumb.path))];
+          req.body.thumbnails = [...req.body.thumbnails || [], (await imageUp(thumb.path))];
         }
       } else {
         req.body.thumbnails = [await imageUp(req.files.thumbnails.path)];
@@ -29,7 +29,7 @@ export const addProduct = ({ db, imageUp }) => async (req, res) => {
     const valid = Object.keys(req.body).every(k => createAllowed.has(k));
     if (!valid) return res.status(400).send('Bad request');
     const whereToBuy = new URL(req.body.productLink).hostname.replace(/^www\./, '');
-    db.create({ table: Product, key: { ...req.body, whereToBuy} })
+    db.create({ table: Product, key: { ...req.body, whereToBuy } })
       .then(async product => {
         if (!product) {
           return res.status(400).send({ message: 'Something Wents Wrong' });
@@ -46,6 +46,8 @@ export const addProduct = ({ db, imageUp }) => async (req, res) => {
     res.status(500).send('Something went wrong.');
   }
 };
+
+
 /**
  * Creates a new product in the database with the specified properties in the request body.
  *
@@ -59,7 +61,7 @@ export const getProducts = ({ db }) => async (req, res) => {
   try {
 
 
-    db.find({ table: Product ,key: { query: req.query, allowedQuery: allowedQuery, paginate:true }})
+    db.find({ table: Product, key: { query: req.query, allowedQuery: allowedQuery, paginate: true } })
       .then(async product => {
         if (!product) {
           return res.status(400).send({ message: 'Something Wents Wrong' });
@@ -88,10 +90,10 @@ export const getSingleProduct = ({ db }) => async (req, res) => {
 
   try {
 
-    db.findOne({ table: Product, key:{id: req.params.id} })
+    db.findOne({ table: Product, key: { id: req.params.id } })
       .then(async (product) => {
         if (!product) {
-          return res.status(400).send({ error:true, message: 'Product not found' });
+          return res.status(400).send({ error: true, message: 'Product not found' });
         }
 
         res.status(200).send(product);

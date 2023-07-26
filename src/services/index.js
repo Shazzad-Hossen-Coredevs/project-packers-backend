@@ -2,6 +2,7 @@ import RequestItem from './RequestItems/requestItem';
 import category from './category/category';
 import demo from './demo/demo';
 import discount from './discount/discount';
+import Image from './image/image';
 import order from './order/order';
 import product from './product/product';
 import user from './user/user';
@@ -13,5 +14,6 @@ export const services = (app) => {
   app.configure(category);
   app.configure(discount);
   app.configure(order);
+  app.configure(Image);
 
 };
