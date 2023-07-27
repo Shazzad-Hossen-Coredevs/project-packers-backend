@@ -1,5 +1,5 @@
 import { auth } from '../middlewares';
-import { getAllRequestedProduct, getSingleProduct, invoiceResponse, requestProduct, sendInvoice, updateProduct } from './requestItem.entity';
+import { addtoProduct, getAllRequestedProduct, getSingleProduct, invoiceResponse, requestProduct, sendInvoice, sendtoCart, updateProduct } from './requestItem.entity';
 
 export default function RequestItem() {
 
@@ -24,6 +24,20 @@ export default function RequestItem() {
   * @response {oblect} - acknowledgement true.
   */
   this.route.post('/request-product/invoice', sendInvoice(this));
+  /**
+ * POST /request-product/add-to-product
+ * @description This route is used to send an requested item to product collection.
+ * @request {Object} -product details object.
+ * @response {oblect} - acknowledgement true.
+ */
+  this.route.post('/request-product/add-to-product', addtoProduct(this));
+  /**
+ * POST /request-product/add-to-product
+ * @description This route is used to send an requested item to users cart.
+ * @request {Object} -product details object.
+ * @response {oblect} - acknowledgement true.
+ */
+  this.route.post('/request-product/send-to-cart', sendtoCart(this));
   /**
   * GET /request-product/invoice/:token
   * @description This route is used to add a receive invoice response.

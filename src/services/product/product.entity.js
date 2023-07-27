@@ -1,7 +1,7 @@
 import Product from './product.schema';
-const createAllowed = new Set(['name', 'desc', 'price', 'from', 'actualPrice', 'whereToBuy', 'develeryTime', 'thumbnails', 'category', 'subCategory', 'quantity', 'productLink', 'status', 'stock']);
+const createAllowed = new Set(['name', 'desc', 'price', 'from', 'whereToBuy', 'develeryTime', 'thumbnails', 'category', 'subCategory', 'quantity', 'link', 'status', 'stock','tax','fee']);
 const allowedQuery = new Set(['page', 'limit', '_id', 'paginate', 'status']);
-const ownUpdateAllowed = new Set(['name', 'desc', 'price', 'from', 'actualPrice', 'whereToBuy', 'develeryTime', 'thumbnails', 'category', 'subCategory', 'quantity', 'productLink']);
+const ownUpdateAllowed = new Set(['name', 'desc', 'price', 'from', 'whereToBuy', 'develeryTime', 'thumbnails', 'category', 'subCategory', 'quantity', 'link', 'status', 'stock', 'tax', 'fee']);
 
 
 /**
@@ -28,7 +28,7 @@ export const addProduct = ({ db, imageUp }) => async (req, res) => {
     }
     const valid = Object.keys(req.body).every(k => createAllowed.has(k));
     if (!valid) return res.status(400).send('Bad request');
-    const whereToBuy = new URL(req.body.productLink).hostname.replace(/^www\./, '');
+    const whereToBuy = new URL(req.body.link).hostname.replace(/^www\./, '');
     db.create({ table: Product, key: { ...req.body, whereToBuy } })
       .then(async product => {
         if (!product) {

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div style='background-color: #124E58;padding: 12px;'>
+    <div style='background-color: #fff; padding: 15px; border-radius: 10px;'>
+      <table style='width: 100%;'>
+        <tr>
+          <td><img src='https://i.ibb.co/p3y1dD5/Frame-2.png' style='height: 30px; width: 80px ; float: left;'
+              alt="Project Packers"></td>
+          <td style='font-size: 14px; font-style: normal; font-weight: 600; float:right'>
+            <%= date %>
+          </td>
+        </tr>
+
+      </table>
+      <p>Dear <%= user.name%>,</p>
+      <p>I hope this email finds you well. Recently, you have requested an item from our store. We appreciate your
+        interest in
+        our products.</p>
+
+
+
+      <div
+        style="display: flex; border-bottom: 1px solid #c9c9c9;padding: 10px 0; font-weight: bold; margin-bottom: 10px;">
+        <div style="width: 100%;">Product</div>
+        <div style="width: 100%; max-width: 80px;"><span style="float:right;">Quantity</span> </div>
+        <div style="width: 100%; max-width: 80px;"><span style="float:right;">Price</span></div>
+      </div>
+      <div style="display: flex; border-bottom: 1px solid #c9c9c9; padding-bottom: 10px; margin-bottom: 10px;">
+        <div style="width: 100%; display: flex; "><img
+            src="https://www.nerdyhacks.in/wp-content/uploads/2018/12/iphone-10.jpg" alt="Image"
+            style="width: 50px; height: 50px; border: 1px solid #747474; padding: 5px;">
+          <p style="margin-left: 10px;">
+            <%= product.name %>
+          </p>
+        </div>
+        <div style="width: 100%; max-width: 80px; "><span style="float:right;">
+            <%= product.quantity %>
+          </span></div>
+        <div style="width: 100%; max-width: 80px;"><span style="float:right;">
+            <%= product.price %> tk
+          </span></div>
+      </div>
+
+
+      <div style="display: flex;border-bottom: 1px solid #c9c9c9; padding-bottom: 10px; margin-bottom: 10px; ">
+        <div style="width: 100%;"></div>
+        <div style="max-width: 200px; width: 100%; ">
+          <div style="padding-bottom: 10px;">Saler Takes</div>
+          <div style="padding-bottom: 10px;">US Sales tax</div>
+          <div style="padding-bottom: 10px;">Packers Fee</div>
+          <div style="padding-bottom: 10px;">Estimated total</div>
+        </div>
+        <div style="max-width: 200px; width: 100%; text-align: end; ">
+          <div style="padding-bottom: 10px;">৳ <%= product.price %> tk</div>
+          <div style="padding-bottom: 10px;">৳ <%= product.tax %> tk</div>
+          <div style="padding-bottom: 10px;">৳ <%= product.fee %> tk</div>
+          <div style="padding-bottom: 10px; font-weight: bold;">৳ <%= product.price + product.tax + product.fee %> tk
+          </div>
+        </div>
+      </div>
+      <p>This product is already added to your cart. You will find this product into your cart and can order it. </p>
+
+      
+      <p>Thank you for choosing our store, and we look forward to serving you.</p>
+
+
+      <div>
+        <p style='background-color: #F2C852;padding: 12px 10px;border-radius: 50px; text-align: center;'><a
+            style="text-decoration: none;" href="http://project-packers.com">Keep Shopping with us</a> </p>
+      </div>
+
+
+    </div>
+    <div style="text-align: center; padding-top: 12px;">
+      <img src="https://i.ibb.co/qgynC2y/Frame-44751.png" style='height: 30px; width: 80px ; ' alt="Project Packers">
+    </div>
+  </div>
+
+
+</body>
+</html>

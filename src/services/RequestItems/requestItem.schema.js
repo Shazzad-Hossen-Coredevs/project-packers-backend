@@ -7,14 +7,16 @@ const schema = new Schema(
     link: { type: String, required: true },
     user: { type: String, required: true },
     price: { type: Number },
-    quantity: { type: String, required: true },
+    quantity: { type: Number, required: true },
     notes: { type: String },
     thumbnails: { type: Array, required: true },
     status: { type: String, enum: ['pending', 'estimate-sent', 'closed', 'abandoned', 'accepted'], default: 'pending' },
     invoice:{ type: Boolean, default: false },
     stock: { type: Number },
     tax: { type: Number},
-    fee: { type: Number}
+    fee: { type: Number },
+    cart: { type: Boolean, default: false },
+    product: { type: String, default: null }
   },
   { timestamps: true }
 );

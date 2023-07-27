@@ -7,10 +7,9 @@ const schema = new Schema(
     status: { type: String, enum:['pending', 'active', 'archived', 'draft'], default: 'pending' },
     stock: { type: Number, required: true },
     thumbnails: { type: Array, required: true },
-    desc: { type: String, required: true },
+    desc: { type: String, default:'On request' },
     price: { type: Number, required: true },
-    actualPrice: { type: Number, required: true },
-    productLink: { type: String, required: true },
+    link: { type: String, required: true },
     from: { type: String, required: true },
     whereToBuy: { type: String, required: true },
     develeryTime: {
