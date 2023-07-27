@@ -387,7 +387,7 @@ export const addTocart = ({ db }) => async (req, res) => {
 export const updateCart = ({ db }) => async (req, res) => {
 
   try {
-    req.user.cart.pop();
+    req.user.cart = [];
     for (let i = 0; i < req.body.cart.length; i++) {
       if (req.body.cart[i].quantity < 1) continue;
       req.user.cart.push({
@@ -431,7 +431,7 @@ export const updateStaff = ({ db }) => async (req, res) => {
     if (!data) return res.status(400).send({ error: true, message: 'Operation failed' });
     if (req.body.access) {
       data.access = req.body.access;
-      
+
     }
     if (req.body.role) {
       if (req.user.role === 'admin' && ((data.role === 'admin' || data.role === 'super-admin') || (req.body.role === 'admin' || req.body.role === 'super-admin'))) {

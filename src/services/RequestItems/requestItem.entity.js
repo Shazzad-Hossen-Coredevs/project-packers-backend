@@ -177,7 +177,7 @@ export const addtoProduct = ({ db }) => async (req, res) => {
     if (!product) return res.status(400).send('Item add to product collection failed');
     item.product = product.id;
     db.save(item);
-    res.status(200).send(product);
+    res.status(200).send(item);
   } catch (error) {
     console.log(error);
     res.status(500).send('Something wents wrong');
@@ -194,7 +194,7 @@ export const sendtoCart = ({ db, mail }) => async (req, res) => {
     if (!product) return res.status(400).send('Something wents wrong');
     const user = await db.findOne({ table: User, key: { id: reqItem.user } });
     if (!user) return res.status(400).send('Something wents wrong');
-    user.cart.push(product);
+    user.cart.push({ product: product.id, quantity: reqItem.quantity });
     const result = await db.save(user);
     if (!result) return res.status(400).send('Something wents wrong');
     reqItem.cart = true;

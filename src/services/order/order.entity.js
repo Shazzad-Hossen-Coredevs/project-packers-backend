@@ -25,17 +25,21 @@ export const addOrder = ({ db }) => async (req, res) => {
       const isFound = discount.user.find((user) => user === req.user.id);
       if (isFound) return res.status(400).send({ error: true, message: 'You already applied this discount code before' });
       req.discount = discount;
-
     }
     if (!req.body.shippingAddress) return res.status(400).send({ error: true, message: 'Shipping address missing in request body' });
     const isValid = paramsValidator(req.body.shippingAddress, ['name', 'address', 'city', 'area', 'zip']);
     if (!isValid) return res.status(400).send({ error: true, message: 'Invalid shipping address' });
     req.user.shippingAddress = req.body.shippingAddress;
     let dTotal = 0, nTotal = 0;
+
     let estimatedDtime = {
       min: 0, max: 0
     };
+    let tax = 0; let fee = 0;
     req.user.cart.forEach(prod => {
+      tax += prod.product.tax;
+      fee += prod.product.fee;
+
       if (prod.product.develeryTime.max > estimatedDtime.max) {
         estimatedDtime.max = prod.product.develeryTime.max;
         estimatedDtime.min = prod.product.develeryTime.min;
@@ -55,14 +59,16 @@ export const addOrder = ({ db }) => async (req, res) => {
       req.discount.type === 'p' ? req.body.subTotal = ((dTotal * (100 - req.discount.amount)) / 100) + nTotal : req.discount.type === 'f' ? req.body.subTotal = (dTotal - req.discount.amount) + nTotal : req.body.subTotal = dTotal + nTotal;
     }
     else req.body.subTotal = dTotal + nTotal;
+    req.body.tax = tax;
+    req.body.fee = fee;
     if (req.body.shipping === 'inside') req.body.shippingAmount = 99;
     else if (req.body.shipping === 'outside') req.body.shippingAmount = 150;
-    req.body.estimatedTotal = req.body.subTotal + req.body.shippingAmount;
+    req.body.estimatedTotal = req.body.subTotal + req.body.shippingAmount+tax+fee;
     req.body.orderNumber = new Date().getTime();
 
     const order = await db.create({
       table: Order,
-      key: { ...req.body, products: req.user.cart, user: req.user.id, status: 'pending', estimatedDtime, populate: { path: 'products.product user', select: '_id shippingAddress name email phone avatar thumbnails price ' } },
+      key: { ...req.body, products: req.user.cart, user: req.user.id, estimatedDtime, populate: { path: 'products.product user', select: '_id shippingAddress name email phone avatar thumbnails price ' } },
     });
     if (!order) return res.status(400).send({ error: true, message: 'Order creation failed' });
     if (req.discount) {
