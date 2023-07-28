@@ -424,7 +424,12 @@ export const addStaff = ({ db }) => async (req, res) => {
 
   }
 };
-
+/**
+ * This function is used to Update staff information
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the updated data.
+ */
 export const updateStaff = ({ db }) => async (req, res) => {
   try {
     const data =await db.findOne({ table: User, key: { id:req.body.id ,body: req.body} });
@@ -441,19 +446,38 @@ export const updateStaff = ({ db }) => async (req, res) => {
       data.role = req.body.role;
       const result = await db.save(data);
       res.status(200).send(result);
-
     }
     else {
       const result = await db.save(data);
       res.status(200).send(result);
     }
-
-
-
-
   } catch (error) {
     console.log(error);
     res.status(500).send('something wents wrong');
 
+  }
+};
+
+/**
+ * This function is used for social login
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the updated data.
+ */
+export const socialData = ({settings}) => async (req, res) => {
+  try {
+    const token = jwt.sign({ id: req.user.id }, settings.secret);
+    res.cookie(settings.secret, token, {
+      httpOnly: true,
+      ...settings.useHTTP2 && {
+        sameSite: 'None',
+        secure: true,
+      },
+      ...!req.body.rememberMe && { expires: new Date(Date.now() + 172800000/*2 days*/) },
+    });
+    res.status(200).send(req.user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('something wents wrong');
   }
 };

@@ -9,6 +9,10 @@
   "EMAIL_NAME": "shazzad.coredevs@gmail.com",
   "EMAIL_FROM": "shazzad.coredevs@gmail.com",
   "MONGODB_URL": "mongodb+srv://shazzadhossen:McfoYCLO9ngu6xO3@cluster0.s2lhhrj.mongodb.net/?retryWrites=true&w=majority",
-  "secret": "coredevs"
+  "secret": "coredevs",
+  "GOOGLE_CLIENT_ID":"428529848917-4hoi4r836hbbe04en1k0u7j6d9c2j2ec.apps.googleusercontent.com",
+  "GOOGLE_CLIENT_SECRET":"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",
+  "FACEBOOK_CLIENT_ID":"613842847587596",
+  "FACEBOOK_CLIENT_SECRET":"8205ddaac657345bf7d327d176302f80"
 
 }

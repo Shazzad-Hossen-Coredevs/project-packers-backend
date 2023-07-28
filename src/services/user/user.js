@@ -1,7 +1,10 @@
+import passport from 'passport';
 import { auth, checkRole } from '../middlewares';
-import { addStaff, addTocart, generateOtp, getAll, login, logout, me, register, remove, resetPassword, updateCart, updateOwn, updateStaff, updateUser, userProfile, verifyOtp } from './user.entity';
+import { passportAuth } from './passport.config';
+import { addStaff, addTocart, generateOtp, getAll, login, logout, me, register, remove, resetPassword, socialData, updateCart, updateOwn, updateStaff, updateUser, userProfile, verifyOtp } from './user.entity';
 
 export default function user() {
+  passportAuth(this);
 
 
   /**
@@ -105,7 +108,46 @@ export default function user() {
   * @description This route is used to create a staff.
   * @response {Object} 200 - the new user.
   */
-  this.route.post('/user/staff', auth, checkRole(['super-admin','admin']), addStaff(this));
+  this.route.post('/user/staff', auth, checkRole(['super-admin', 'admin']), addStaff(this));
+
+  /**
+ * GET /user/google
+ * @description This route is used to login using google.
+ * @response {Object} 200 - the new user.
+ */
+  this.route.get('/user/google', passport.authenticate('google'));
+  /**
+ * GET /user/google/callback
+ * @description This route is for google callback url.
+ * @response {Object} 200 - the new user.
+ */
+  this.route.get('/user/google/callback', passport.authenticate('google', {
+    successRedirect: 'http://localhost:5173/success',
+    failureRedirect: 'http://localhost:5173/failed'
+  }));
+  /**
+* GET /user/facebook
+* @description This route is used to login using facebook.
+* @response {Object} 200 - the new user.
+*/
+  this.route.get('/user/facebook', passport.authenticate('facebook'));
+  /**
+ * GET /user/facebook/callback
+ * @description This route is for google callback url.
+ * @response {Object} 200 - the new user.
+ */
+  this.route.get('/user/facebook/callback', passport.authenticate('facebook', {
+    successRedirect: 'http://localhost:5173/success',
+    failureRedirect: 'http://localhost:5173/failed'
+  }));
+  /**
+  * GET /user/social
+  * @description This route is used to fatch socail login data.
+  * @response {Object} 200 - the new user.
+  */
+  this.route.get('/user/social', socialData(this));
+
+
 
 
 }

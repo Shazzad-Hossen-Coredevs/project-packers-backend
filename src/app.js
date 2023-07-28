@@ -28,6 +28,8 @@ import settings from '../settings.json';
 import { imageUp } from './controllers/imageUp';
 import gracefullShutdown from './controllers/gracefullShutdown';
 import { driverCache } from './controllers/driverCache';
+import session from 'express-session';
+import passport from 'passport';
 
 export default class App {
   constructor({ deps } = {}) {
@@ -71,11 +73,36 @@ export default class App {
     });
 
     // Load the middlewwares
-    this.express.use(
-      cors({
-        origin: this.config.origin,
-        credentials: true
-      }));
+    this.express.use(cors({
+      origin: 'http://localhost:5173',
+      credentials: true
+
+    }));
+    // this.express.use(
+    //   cors({
+    //     origin: this.config.origin,
+    //     credentials: true
+    //   }));methods: []
+
+    this.express.use(session({
+      secret: this.config.secret,
+      resave: false,
+      saveUninitialized: true,
+      cookie: {
+        secure: false,
+        expires: new Date(Date.now() + 172800000/*2 days*/),
+      }
+
+    }));
+    // this.express.use(function (req, res, next) {
+    //   var msgs = req.session.messages || [];
+    //   res.locals.messages = msgs;
+    //   res.locals.hasMessages = !!msgs.length;
+    //   req.session.messages = [];
+    //   next();
+    // });
+    this.express.use(passport.initialize());
+    this.express.use(passport.session());
     this.express.use(morgan('common')); // Logger
     this.express.use(actuator({ infoGitMode: 'full' })); // Health Checker
     this.express.use(json()); // Parse JSON response
@@ -84,7 +111,7 @@ export default class App {
     this.express.use(parse()); // Parse Form data as JSON
     this.express.use('/api', limiter, this.router); // All the API routes
     this.express.use(express.static(path.resolve(__dirname, '..', 'client'))); // REACT build files (Statics)
-    // this.express.use('/images', express.static('images'));
+
 
     if (this.config.useHTTP2) {
       // SSL configuration
