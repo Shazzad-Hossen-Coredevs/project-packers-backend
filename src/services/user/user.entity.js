@@ -481,3 +481,8 @@ export const socialData = ({settings}) => async (req, res) => {
     res.status(500).send('something wents wrong');
   }
 };
+
+export const chatwithUser = (event) => {
+  console.log(event);
+
+};

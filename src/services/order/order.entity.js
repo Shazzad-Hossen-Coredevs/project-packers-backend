@@ -1,5 +1,7 @@
 import Order from './order.schema';
 import Discount from '../discount/discount.schema';
+import SSLCommerzPayment from 'sslcommerz-lts';
+
 
 
 const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shipping', 'cancel']);
@@ -11,7 +13,7 @@ const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shippin
  * @returns {Object} acknowledgement: true
  * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
  */
-export const addOrder = ({ db }) => async (req, res) => {
+export const addOrder = ({ db, settings }) => async (req, res) => {
 
   try {
     if (!req.user.cart.length) return res.status(400).send({ error: true, message: 'You can not order while your cart is empty' });
@@ -68,7 +70,7 @@ export const addOrder = ({ db }) => async (req, res) => {
 
     const order = await db.create({
       table: Order,
-      key: { ...req.body, products: req.user.cart, user: req.user.id, estimatedDtime, populate: { path: 'products.product user', select: '_id shippingAddress name email phone avatar thumbnails price ' } },
+      key: { ...req.body, products: req.user.cart, user: req.user.id, estimatedDtime, populate: { path: 'products.product user', select: '_id shippingAddress name email phone avatar thumbnails price  category' } },
     });
     if (!order) return res.status(400).send({ error: true, message: 'Order creation failed' });
     if (req.discount) {
@@ -77,7 +79,43 @@ export const addOrder = ({ db }) => async (req, res) => {
     }
     req.user.cart = [];
     db.save(req.user);
-    res.status(200).send(order);
+    const data = {
+      total_amount: order.estimatedTotal,
+      currency: 'BDT',
+      tran_id: order.orderNumber, // use unique tran_id for each api call
+      success_url: `http://localhost:4000/api/order/payment/success/${order.id}`,
+      fail_url: `http://localhost:4000/api/order/payment/fail/${order.id}`,
+      cancel_url: `http://localhost:4000/api/order/payment/cancel/${order.id}`,
+      ipn_url: 'http://localhost:4000/api/order/payment/ipn',
+      shipping_method: 'Courier',
+      product_name: order.products[0].product.name,
+      product_category: order.products[0].product.category,
+      product_profile: 'general',
+      cus_name: order.user.name,
+      cus_email: order.user.email,
+      cus_add1: order.shippingAddress.address,
+      cus_add2: order.shippingAddress.address,
+      cus_city: order.shippingAddress.city,
+      cus_state: order.shippingAddress.area,
+      cus_postcode: order.shippingAddress.zip,
+      cus_country: 'Bangladesh',
+      cus_phone: order.user.phone,
+      cus_fax: order.user.phone,
+      ship_name: order.user.name,
+      ship_add1: order.shippingAddress.address,
+      ship_add2: order.shippingAddress.address,
+      ship_city: order.shippingAddress.city,
+      ship_state: order.shippingAddress.area,
+      ship_postcode: Number(order.shippingAddress.zip),
+      ship_country: 'Bangladesh',
+    };
+    const sslcz = new SSLCommerzPayment(settings.PAYMENT_GATEWAY.STORE_ID, settings.PAYMENT_GATEWAY.STORE_PSWD, false);
+    sslcz.init(data).then(apiResponse => {
+      const GatewayPageURL = apiResponse.GatewayPageURL;
+      res.status(200).send(GatewayPageURL);
+
+    });
+
   }
   catch (e) {
     console.log(e);
@@ -225,6 +263,52 @@ export const userOrder = ({ db }) => async (req, res) => {
   try {
     const orders = await db.find({ table: Order, key: { id: req.params.id } });
     res.send(orders);
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Something went wrong.');
+
+  }
+};
+
+export const successPayment = ({ db }) => async (req, res) => {
+  try {
+    const order = await db.findOne({ table: Order, key: { id: req.params.id } });
+    order.status = 'paid';
+    db.save(order);
+    //redirect url will be change .
+    res.redirect('http://shazzad.online');
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Something went wrong.');
+
+  }
+};
+export const failPayment = ({ db }) => async (req, res) => {
+  try {
+    //redirect url will be change .
+    res.redirect('http://shazzad.online');
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Something went wrong.');
+
+  }
+};
+export const cancelPayment = ({ db }) => async (req, res) => {
+  try {
+    //redirect url will be change .
+    res.redirect('http://shazzad.online');
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Something went wrong.');
+
+  }
+};
+export const ipnPayment = ({ db }) => async (req, res) => {
+  try {
+
 
   } catch (error) {
     console.log(error);

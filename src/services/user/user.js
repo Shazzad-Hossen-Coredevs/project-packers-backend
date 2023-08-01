@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { auth, checkRole } from '../middlewares';
 import { passportAuth } from './passport.config';
-import { addStaff, addTocart, generateOtp, getAll, login, logout, me, register, remove, resetPassword, socialData, updateCart, updateOwn, updateStaff, updateUser, userProfile, verifyOtp } from './user.entity';
+import { addStaff, addTocart, chatwithUser, generateOtp, getAll, login, logout, me, register, remove, resetPassword, socialData, updateCart, updateOwn, updateStaff, updateUser, userProfile, verifyOtp } from './user.entity';
 
 export default function user() {
   passportAuth(this);
@@ -150,4 +150,11 @@ export default function user() {
 
 
 
+
 }
+
+export const supportChat = (app) => {
+  //app.register('eventname', chatwithUser);
+
+
+};

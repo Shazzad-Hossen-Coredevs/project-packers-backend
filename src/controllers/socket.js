@@ -17,7 +17,8 @@ import { Server } from 'socket.io';
 export default function start(server, options) {
   const io = new Server(server, {
     cors: {
-      origin: options.origin,
+      // origin: options.origin,
+      origin: 'http://localhost:5173',
       credentials: true,
       methods: ['GET', 'POST']
     }
@@ -48,7 +49,6 @@ export function listen(io, events, ...middlewares) {
     io.on('connection', async ws => {
       console.log('Connected =>', ws.id);
       ws.on('disconnect', () => console.log('Diconnected =>', ws.id));
-
       ws.onAny((event, ...args) => {
         events[event]?.method({ data: args[0], session: ws, ...events[event]?.props });
       });

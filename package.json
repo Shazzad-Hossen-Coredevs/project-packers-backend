@@ -26,6 +26,7 @@
     "express-rate-limit": "^6.7.0",
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.0",
+    "moment": "^2.29.4",
     "mongoose": "^6.8.4",
     "mongoose-paginate-v2": "^1.7.1",
     "morgan": "^1.10.0",
@@ -36,6 +37,7 @@
     "peer": "^1.0.0",
     "socket.io": "^4.6.1",
     "spdy": "^4.0.2",
+    "sslcommerz-lts": "^1.1.0",
     "web-push": "^3.5.0"
   },
   "devDependencies": {

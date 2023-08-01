@@ -4,7 +4,7 @@ import paginate from 'mongoose-paginate-v2';
 const schema = new Schema(
   {
     orderNumber: { type: Number, required: true },
-    status: { type: String, enum: ['completed', 'pending', 'processing', 'shipping', 'cancel'],default: 'pending' },
+    status: { type: String, enum: ['completed', 'pending', 'processing', 'shipping', 'canceled', 'paid'],default: 'pending' },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     estimatedDtime: {
       min: { type: Date, required: true },
