@@ -147,8 +147,9 @@ export const getHeatmap = () => async (req, res) => {
       };
 
       ordersData.forEach((data) => {
-        
-        const hour = data.hour;
+
+        const hour = (data.hour)+6;
+
         const slot = hour >= 3 && hour < 6 ? '3am' : hour >= 6 && hour < 9 ? '6am' :
           hour >= 9 && hour < 12 ? '9am' : hour >= 12 && hour < 15 ? '12am' :
             hour >= 15 && hour < 18 ? '3pm' : hour >= 18 && hour < 21 ? '6pm' : '9pm';

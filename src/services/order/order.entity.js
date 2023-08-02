@@ -109,7 +109,7 @@ export const addOrder = ({ db, settings }) => async (req, res) => {
       ship_postcode: Number(order.shippingAddress.zip),
       ship_country: 'Bangladesh',
     };
-    const sslcz = new SSLCommerzPayment(settings.PAYMENT_GATEWAY.STORE_ID, settings.PAYMENT_GATEWAY.STORE_PSWD, false);
+    const sslcz = new SSLCommerzPayment(settings.PAYMENT_GATEWAY.STORE_ID, settings.PAYMENT_GATEWAY.STORE_PSWD, settings.PAYMENT_GATEWAY.IS_LIVE);
     sslcz.init(data).then(apiResponse => {
       const GatewayPageURL = apiResponse.GatewayPageURL;
       res.status(200).send(GatewayPageURL);
@@ -201,6 +201,7 @@ export const updateOrderstatus = ({ db }) => async (req, res) => {
  */
 export const deleteOrder = ({ db }) => async (req, res) => {
   try {
+
     const isFound = await db.findOne({ table: Order, key: { id: req.params.id } });
     if (!isFound) return res.status(400).send({ error: true, message: 'Order not Found' });
     isFound.remove();
@@ -271,13 +272,38 @@ export const userOrder = ({ db }) => async (req, res) => {
   }
 };
 
-export const successPayment = ({ db }) => async (req, res) => {
+export const successPayment = ({ db, settings }) => async (req, res) => {
   try {
+
     const order = await db.findOne({ table: Order, key: { id: req.params.id } });
-    order.status = 'paid';
-    db.save(order);
-    //redirect url will be change .
-    res.redirect('http://shazzad.online');
+    const sslcz = new SSLCommerzPayment(settings.PAYMENT_GATEWAY.STORE_ID, settings.PAYMENT_GATEWAY.STORE_PSWD, settings.PAYMENT_GATEWAY.IS_LIVE);
+    const response = await sslcz.validate({ val_id: req.body.val_id });
+
+    if (response.status === 'VALID' && order.estimatedTotal === Number(response.amount)) {
+      order.status = 'paid';
+      order.paymentDetails = {
+        val_id: response.val_id,
+        tran_id: response.tran_id,
+        tran_date: response.tran_date,
+        bank_tran_id: response.bank_tran_id,
+        card_type: response.card_type,
+        card_no: response.card_no,
+        card_issuer: response.card_issuer,
+        card_brand: response.card_brand,
+        card_category: response.card_category,
+        card_sub_brand: response.card_sub_brand,
+        card_issuer_country: response.card_issuer_country,
+        card_issuer_country_code: response.card_issuer_country_code,
+        currency_type: response.currency_type
+      };
+
+    }
+    await db.save(order);
+    res.redirect(`http://shazzad.online/?status=${order.status}`);
+
+
+
+
 
   } catch (error) {
     console.log(error);
@@ -288,7 +314,7 @@ export const successPayment = ({ db }) => async (req, res) => {
 export const failPayment = ({ db }) => async (req, res) => {
   try {
     //redirect url will be change .
-    res.redirect('http://shazzad.online');
+    res.redirect('http://shazzad.online/?status=failed');
 
   } catch (error) {
     console.log(error);
@@ -299,7 +325,7 @@ export const failPayment = ({ db }) => async (req, res) => {
 export const cancelPayment = ({ db }) => async (req, res) => {
   try {
     //redirect url will be change .
-    res.redirect('http://shazzad.online');
+    res.redirect('http://shazzad.online/?status=canceled');
   } catch (error) {
     console.log(error);
     res.status(500).send('Something went wrong.');
@@ -308,6 +334,7 @@ export const cancelPayment = ({ db }) => async (req, res) => {
 };
 export const ipnPayment = ({ db }) => async (req, res) => {
   try {
+    //
 
 
   } catch (error) {

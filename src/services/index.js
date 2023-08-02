@@ -8,6 +8,7 @@ import product from './product/product';
 import support from './support/support';
 import user, { supportChat } from './user/user';
 import graph from './graph/graph';
+import refund from './refund/refund';
 export const services = (app) => {
   app.configure(demo);
   app.configure(user);
@@ -19,6 +20,7 @@ export const services = (app) => {
   app.configure(Image);
   app.configure(support);
   app.configure(graph);
+  app.configure(refund);
   supportChat(app);
 
 };

@@ -4,7 +4,7 @@ import paginate from 'mongoose-paginate-v2';
 const schema = new Schema(
   {
     orderNumber: { type: Number, required: true },
-    status: { type: String, enum: ['completed', 'pending', 'processing', 'shipping', 'canceled', 'paid'],default: 'pending' },
+    status: { type: String, enum: ['completed', 'pending', 'processing', 'shipping', 'canceled', 'paid', 'refunded', 'refund initiated', 'refund cancelled'],default: 'pending' },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     estimatedDtime: {
       min: { type: Date, required: true },
@@ -39,6 +39,7 @@ const schema = new Schema(
     estimatedTotal: { type: Number, required: true },
     tax: { type: Number, required: true },
     fee: { type: Number, required: true },
+    paymentDetails: { type: Object }
 
   },
   { timestamps: true }
@@ -48,7 +49,7 @@ schema.plugin(paginate);
 schema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.__v;
-  delete obj.createdAt;
+  //delete obj.createdAt;
   delete obj.updatedAt;
   return JSON.parse(JSON.stringify(obj));
 };
