@@ -43,18 +43,20 @@ export const demoMail = ({mail}) => async (req, res) => {
 
 };
 
-export const demoGraph = ({ db }) => async (req, res) => {
+export const demoGraph = ({ ws }) => async (req, res) => {
   try {
-    const data = await db.find({ table: Order });
-    data.docs.forEach(o => {
-      const date = new Date(o.createdAt).toLocaleString();
-      console.log(date);
-      console.log(new Date(o.createdAt).getHours());
+    ws.emit('64c113b6f1c89453df04aedc', {
+      type: 'gen',
+      msg: 'hi User',
+      link: '/',
+      date: new Date()
+
     });
+
 
   } catch (error) {
     console.log(error);
     res.status(500).send('Something wents wrong');
 
   }
-}
+};

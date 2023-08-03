@@ -95,9 +95,9 @@ const weeklyData = async (startOfWeek, endOfWeek) => {
 
   // Merge the ordersData and requestData arrays to create the final data array
   const data = ordersData.map((orderData, index) => ({
-    day: orderData.day,
-    order: orderData.order,
-    request: requestData[index].order,
+    day: orderData?.day,
+    order: orderData?.order || 0,
+    request: requestData[index]?.order || 0,
   }));
 
   return(data);

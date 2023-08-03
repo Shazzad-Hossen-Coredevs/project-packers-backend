@@ -10,7 +10,7 @@ import Product from '../product/product.schema';
 /**
  * these are the set to validate the request body or query.
  */
-const createAllowed = new Set(['name', 'email', 'password', 'phone', 'role', 'avatar', 'shippingAddress']);
+const createAllowed = new Set(['name', 'email', 'password', 'phone', 'role', 'avatar', 'shippingAddress', 'fbId']);
 const allowedQuery = new Set(['name', 'page', 'limit', 'id', 'paginate', 'role', 'sortBy', 'search']);
 const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange']);
 
@@ -56,7 +56,7 @@ export const register = ({ db }) => async (req, res) => {
  * @param {Object} res this is the response object
  * @returns It returns the data for success response. Otherwise it will through an error.
  */
-export const login = ({ db, settings }) => async (req, res) => {
+export const login = ({ db, settings, ws }) => async (req, res) => {
 
 
   try {
@@ -74,6 +74,7 @@ export const login = ({ db, settings }) => async (req, res) => {
       },
       ...!req.body.rememberMe && { expires: new Date(Date.now() + 172800000/*2 days*/) },
     });
+    ws.emit('ss', 'Your order successfully placed');
     res.status(200).send(user);
   }
   catch (err) {

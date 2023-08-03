@@ -2,6 +2,7 @@ import { generateMail } from '../../controllers/email/template/generateMail';
 import RequestItem from './requestItem.schema';
 import User from '../user/user.schema';
 import Product from '../product/product.schema';
+import Notification from '../notification/notification.schema';
 import jwt from 'jsonwebtoken';
 
 const createAllowed = new Set(['name', 'link', 'quantity', 'thumbnails', 'notes','user']);
@@ -101,7 +102,7 @@ export const updateProduct = ({ db }) => async (req, res) => {
 };
 
 
-export const sendInvoice = ({ db, settings, mail }) => async (req, res) => {
+export const sendInvoice = ({ db, settings, mail, ws }) => async (req, res) => {
   try {
     if (!req.body.id) return res.status(400).send({ error: true, message: 'id missing in request body' });
     const product = await db.findOne({ table: RequestItem, key: { id: req.body.id } });
@@ -130,8 +131,19 @@ export const sendInvoice = ({ db, settings, mail }) => async (req, res) => {
     product.status = 'estimate-sent';
     product.invoice = true;
     const result = await db.save(product);
-    if (!result) return res.status(400).send({ error: true, message: 'Sattus set to estimate-sent failed' });
+    if (!result) return res.status(400).send({ error: true, message: 'Satus set to estimate-sent failed' });
     res.status(200).send(result);
+    const notification = await db.create({
+      table: Notification, key: {
+        user: user.id,
+        type: 'prod',
+        msg: 'Invoice for your requested product is sent to your email. Please check your email. We are waiting for your response.',
+        url: '/'
+      }
+    });
+
+    if (notification) ws.emit(user.id, notification);
+
 
   } catch (error) {
     console.log(error);
@@ -185,7 +197,7 @@ export const addtoProduct = ({ db }) => async (req, res) => {
 
 };
 
-export const sendtoCart = ({ db, mail }) => async (req, res) => {
+export const sendtoCart = ({ db, mail, ws }) => async (req, res) => {
   try {
     if (!req.body.id) return res.status(400).send('Requested product id missing in request body');
     const reqItem = await db.findOne({ table: RequestItem, key: { id: req.body.id } });
@@ -206,8 +218,19 @@ export const sendtoCart = ({ db, mail }) => async (req, res) => {
       body: html,
       type: 'html',
     });
-    if (!mailRes) return res.status(400).send({ error: true, message: 'Invoice send Failed' });
+    if (!mailRes) return res.status(400).send({ error: true, message: 'Sending mail  Failed' });
     res.status(200).send('Success');
+    const notification = await db.create({
+      table: Notification, key: {
+        user: user.id,
+        type: 'prod',
+        msg: 'Your requested item is sent to your cart. Please check your cart and order the product.',
+        url: '/'
+      }
+    });
+
+    if (notification) ws.emit(user.id, notification);
+
 
 
 

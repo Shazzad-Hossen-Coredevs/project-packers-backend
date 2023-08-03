@@ -4,7 +4,8 @@ import paginate from 'mongoose-paginate-v2';
 const schema = new Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, unique: true },
+    fbId: { type: String },
     password: { type: String, },
     phone: { type: String, default:null },
     role: { type: String, enum: ['super-admin', 'admin', 'support', 'user'], default: 'user' },

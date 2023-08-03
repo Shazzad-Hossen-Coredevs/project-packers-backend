@@ -1,10 +1,11 @@
 import Order from './order.schema';
 import Discount from '../discount/discount.schema';
 import SSLCommerzPayment from 'sslcommerz-lts';
+import Notification from '../notification/notification.schema';
 
 
 
-const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shipping', 'cancel']);
+const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shipping', 'canceled']);
 /**
  * Creates new order in the database based on the property of request body.
  *
@@ -13,7 +14,7 @@ const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shippin
  * @returns {Object} acknowledgement: true
  * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
  */
-export const addOrder = ({ db, settings }) => async (req, res) => {
+export const addOrder = ({ db, settings,ws }) => async (req, res) => {
 
   try {
     if (!req.user.cart.length) return res.status(400).send({ error: true, message: 'You can not order while your cart is empty' });
@@ -110,9 +111,19 @@ export const addOrder = ({ db, settings }) => async (req, res) => {
       ship_country: 'Bangladesh',
     };
     const sslcz = new SSLCommerzPayment(settings.PAYMENT_GATEWAY.STORE_ID, settings.PAYMENT_GATEWAY.STORE_PSWD, settings.PAYMENT_GATEWAY.IS_LIVE);
-    sslcz.init(data).then(apiResponse => {
+    sslcz.init(data).then(async(apiResponse) => {
       const GatewayPageURL = apiResponse.GatewayPageURL;
       res.status(200).send(GatewayPageURL);
+      const notification = await db.create({
+        table: Notification, key: {
+          user: req.user.id,
+          type: 'prod',
+          msg: 'Your Order has been placed. Please complete your payment.',
+          url: '/'
+        }
+      });
+
+      if (notification) ws.emit(req.user.id, notification);
 
     });
 
@@ -173,7 +184,7 @@ export const getOrders = ({ db }) => async (req, res) => {
  */
 
 
-export const updateOrderstatus = ({ db }) => async (req, res) => {
+export const updateOrderstatus = ({ db, ws }) => async (req, res) => {
   try {
     const isValid = paramsValidator(req.body, ['id', 'status']);
     if (!isValid) return res.status(400).send({ error: true, message: ' Invalid body object keys' });
@@ -184,6 +195,16 @@ export const updateOrderstatus = ({ db }) => async (req, res) => {
     order.status = req.body.status;
     db.save(order);
     res.status(200).send(order);
+    const notification = await db.create({
+      table: Notification, key: {
+        user: order.user,
+        type: 'prod',
+        msg: order.status === 'completed' ? `your product for order no: ${order.orderNumber} has been delivered.` : order.status === 'processing' ? `We are currently processing your order ( Order no: ${order.orderNumber})` : order.status === 'shipping' ? `The shipping process of your order is started ( Order no: ${order.orderNumber})` : order.status === 'canceled' ? `Your order ( Order no: ${order.orderNumber}) has been canceled`: 'This is the autometed notification from the system',
+        url: '/'
+      }
+    });
+
+    if (notification) ws.emit(order.user, notification);
 
   } catch (e) {
     console.log(e);
@@ -272,7 +293,7 @@ export const userOrder = ({ db }) => async (req, res) => {
   }
 };
 
-export const successPayment = ({ db, settings }) => async (req, res) => {
+export const successPayment = ({ db, settings, ws }) => async (req, res) => {
   try {
 
     const order = await db.findOne({ table: Order, key: { id: req.params.id } });
@@ -299,7 +320,19 @@ export const successPayment = ({ db, settings }) => async (req, res) => {
 
     }
     await db.save(order);
-    res.redirect(`http://shazzad.online/?status=${order.status}`);
+    res.redirect(`http://localhost:5173/order-success/?status=${order.status}`);
+    const notification = await db.create({
+      table: Notification, key: {
+        user: order.user,
+        type: 'prod',
+        msg: `You have successfully paid the amount for your order no: ${order.orderNumber}`,
+        url: '/'
+      }
+    });
+
+    if (notification) ws.emit(order.user, notification);
+
+
 
 
 
@@ -311,7 +344,7 @@ export const successPayment = ({ db, settings }) => async (req, res) => {
 
   }
 };
-export const failPayment = ({ db }) => async (req, res) => {
+export const failPayment = () => async (req, res) => {
   try {
     //redirect url will be change .
     res.redirect('http://shazzad.online/?status=failed');
@@ -322,7 +355,7 @@ export const failPayment = ({ db }) => async (req, res) => {
 
   }
 };
-export const cancelPayment = ({ db }) => async (req, res) => {
+export const cancelPayment = () => async (req, res) => {
   try {
     //redirect url will be change .
     res.redirect('http://shazzad.online/?status=canceled');
@@ -332,7 +365,7 @@ export const cancelPayment = ({ db }) => async (req, res) => {
 
   }
 };
-export const ipnPayment = ({ db }) => async (req, res) => {
+export const ipnPayment = () => async (req, res) => {
   try {
     //
 

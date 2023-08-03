@@ -1,9 +1,11 @@
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
-const FacebookStrategy = require('passport-facebook');
+import { Strategy as FacebookStrategy } from 'passport-facebook';
 const passport = require('passport');
 import User from './user.schema';
 
 export const passportAuth = ({ db, settings }) => {
+  console.log(settings.FACEBOOK_CLIENT_ID)
+
 //Google Strategy
   passport.use(new GoogleStrategy({
     clientID: settings.GOOGLE_CLIENT_ID,
@@ -23,18 +25,25 @@ export const passportAuth = ({ db, settings }) => {
   ));
 
   //facebook Strategy
+  passport.use(new FacebookStrategy(
+    {
+      clientID: settings.FACEBOOK_CLIENT_ID,
+      clientSecret: settings.FACEBOOK_CLIENT_SECRET,
+      callbackURL: 'http://localhost:4000/api/user/facebook/callback'
+    }, async(accessToken, refreshToken, profile, done) => {
+      const user = await db.findOne({ table: User, key: { fbId: profile.id } });
+      if (!user) {
+        const newUser = db.create({ table: User, key: { fbId: profile.id, name: profile.displayName } });
+        if (!newUser) return done(null, null);
+        return done(null, newUser);
+      }
+      console.log(profile);
+      return done(null, user);
 
-  passport.use(new FacebookStrategy({
-    clientID: settings.FACEBOOK_CLIENT_ID,
-    clientSecret: settings.FACEBOOK_CLIENT_SECRET,
-    callbackURL: 'http://localhost:4000/api/user/facebook/callback',
-    profileFields: ['id', 'displayName', 'photos', 'email']
-  },
-  function (accessToken, refreshToken, profile, done) {
-    console.log(profile);
-    done(null, null);
+    }
+  ));
 
-  }));
+
 
 
   passport.serializeUser((user, done) => {
