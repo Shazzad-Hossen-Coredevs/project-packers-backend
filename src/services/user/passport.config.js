@@ -4,8 +4,6 @@ const passport = require('passport');
 import User from './user.schema';
 
 export const passportAuth = ({ db, settings }) => {
-  console.log(settings.FACEBOOK_CLIENT_ID)
-
 //Google Strategy
   passport.use(new GoogleStrategy({
     clientID: settings.GOOGLE_CLIENT_ID,
@@ -37,7 +35,6 @@ export const passportAuth = ({ db, settings }) => {
         if (!newUser) return done(null, null);
         return done(null, newUser);
       }
-      console.log(profile);
       return done(null, user);
 
     }

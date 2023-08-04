@@ -6,7 +6,7 @@ import Image from './image/image';
 import order from './order/order';
 import product from './product/product';
 import support from './support/support';
-import user, { supportChat } from './user/user';
+import user from './user/user';
 import graph from './graph/graph';
 import refund from './refund/refund';
 import notification from './notification/notification';
@@ -23,6 +23,6 @@ export const services = (app) => {
   app.configure(graph);
   app.configure(refund);
   app.configure(notification);
-  supportChat(app);
+
 
 };

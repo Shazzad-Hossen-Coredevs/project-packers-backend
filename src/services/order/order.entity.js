@@ -124,7 +124,7 @@ export const addOrder = ({ db, settings,ws }) => async (req, res) => {
         }
       });
 
-      if (notification) ws.emit(req.user.id, notification);
+      if (notification) ws.to(req.user.id).emit('notification', { ...notification });
 
     });
 

@@ -30,6 +30,7 @@ import gracefullShutdown from './controllers/gracefullShutdown';
 import { driverCache } from './controllers/driverCache';
 import session from 'express-session';
 import passport from 'passport';
+import { socketMiddleware } from './services/middlewares';
 
 export default class App {
   constructor({ deps } = {}) {
@@ -41,7 +42,7 @@ export default class App {
     this.imageUp = imageUp;
     this.db = operations;
     this.events = {};
-    this.wsMiddlewares = [];
+    this.wsMiddlewares = [socketMiddleware];
 
     if (deps) {
       let promises = deps.map(({ method, args }) => new Promise((resolve, reject) => method(...args).then(r => resolve(r)).catch((err) => reject(err))));
@@ -74,7 +75,7 @@ export default class App {
 
     // Load the middlewwares
     this.express.use(cors({
-      origin: 'http://localhost:5173',
+      origin: ['http://localhost:5173', 'http://localhost:5174'],
       credentials: true
 
     }));

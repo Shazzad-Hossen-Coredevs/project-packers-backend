@@ -38,7 +38,7 @@ export const updateRefund = ({ db }) => async (req, res) => {
     const order = await db.findOne({ table: Order, key: { id: refund.order._id } });
     if (!order) return res.status(400).send('Something wents wrong');
     refund.status = status;
-    order.status = status === 'initiated' ? 'refund initiated' : status === 'completed' ? 'refunded' : status === 'canceled' ? 'refund cancelled' : order.status;
+    order.status = status === 'processing' ? 'refundProcessing' : status === 'completed' ? 'refunded' : status === 'cancelled' ? 'refundCancelled' : order.status;
     await db.save(refund);
     await db.save(order);
     res.status(200).send(refund);

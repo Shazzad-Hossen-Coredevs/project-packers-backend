@@ -5,7 +5,7 @@ const schema = new Schema(
   {
     orderNumber: { type: Number, required: true },
     date: { type: String },
-    status: { type: String, enum: ['completed', 'pending', 'processing', 'shipping', 'canceled', 'paid', 'refunded', 'refund initiated', 'refund cancelled'],default: 'pending' },
+    status: { type: String, enum: ['completed', 'pending', 'processing', 'shipping', 'cancelled', 'paid', 'refunded', 'refundProcessing', 'refundCancelled'],default: 'pending' },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     estimatedDtime: {
       min: { type: Date, required: true },

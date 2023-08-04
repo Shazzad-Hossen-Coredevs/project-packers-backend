@@ -18,7 +18,7 @@ export default function start(server, options) {
   const io = new Server(server, {
     cors: {
       // origin: options.origin,
-      origin: 'http://localhost:5173',
+      origin: ['http://localhost:5173', 'http://localhost:5174'],
       credentials: true,
       methods: ['GET', 'POST']
     }
@@ -40,7 +40,7 @@ export default function start(server, options) {
  */
 export function listen(io, events, ...middlewares) {
   (new Promise((resolve) => {
-    for (let i in middlewares) {
+    for (let i of middlewares) {
       io.use(i);
     }
 

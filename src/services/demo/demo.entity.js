@@ -45,13 +45,7 @@ export const demoMail = ({mail}) => async (req, res) => {
 
 export const demoGraph = ({ ws }) => async (req, res) => {
   try {
-    ws.emit('64c113b6f1c89453df04aedc', {
-      type: 'gen',
-      msg: 'hi User',
-      link: '/',
-      date: new Date()
-
-    });
+    ws.to('64c113b6f1c89453df04aedc').emit('ss', {msg: ' test msg'});
 
 
   } catch (error) {

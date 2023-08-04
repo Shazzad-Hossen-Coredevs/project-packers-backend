@@ -37,3 +37,29 @@ export async function auth(req, res, next) {
     res.status(401).send({ status: 401, reason: 'Unauthorized' });
   }
 }
+
+
+/**
+
+* This is used for user authentication for socket.
+
+*/
+
+export async function socketMiddleware(socket, next) {
+
+  try {
+    const coreDevsCookie = socket?.handshake?.headers?.cookie.match(/coredevs=([^;]+)/);
+    const token = coreDevsCookie ? coreDevsCookie[1] : null;
+    if (!token) throw new Error('Unauthorized');
+    const user = await decodeAuthToken(token);
+    if (!user) throw new Error('Unauthorized');
+    socket.user = user;
+    socket.join(user.id);
+    next();
+  } catch (e) {
+    console.log(e);
+    next(new Error('Unauthorized'));
+
+  }
+
+}

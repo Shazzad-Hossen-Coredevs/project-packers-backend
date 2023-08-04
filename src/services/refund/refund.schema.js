@@ -3,7 +3,7 @@ import paginate from 'mongoose-paginate-v2';
 
 const schema = new Schema(
   {
-    status: { type: String, enum: ['pending', 'initiated', 'completed', 'canceled'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'processing', 'completed', 'cancelled'], default: 'pending' },
     order: { type: mongoose.Schema.Types.ObjectId, ref: 'order', required: true , unique: true },
     reason: { type: String, required: true },
     refunded: { type: Boolean, default: false }

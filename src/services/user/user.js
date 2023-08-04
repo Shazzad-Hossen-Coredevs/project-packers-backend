@@ -153,8 +153,3 @@ export default function user() {
 
 }
 
-export const supportChat = (app) => {
-  //app.register('eventname', chatwithUser);
-
-
-};
