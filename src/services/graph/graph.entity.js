@@ -168,3 +168,27 @@ export const getHeatmap = () => async (req, res) => {
   }
 };
 
+export const overviewData = ({ db }) => async (req, res) => {
+  try {
+    const order = await db.aggr({
+      table: Order, key: [{
+        $group: {
+          _id: null,
+          totalCost: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, '$estimatedTotal', 0] } },
+          completed: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+          canceled: { $sum: { $cond: [{ $eq: ['$status', 'canceled'] }, 1, 0] } },
+          totalOrder: { $sum: 1 }
+        }
+      }]
+    });
+    const totalReq = await db.aggr({ table: Request, key: [{ $group: { _id: null, totalReq: { $sum: 1 } } }] });
+    res.send({ ...order[0], totalReq: totalReq[0].totalReq });
+
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send('Something wents wrong');
+
+  }
+};
+

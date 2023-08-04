@@ -68,6 +68,7 @@ export const addOrder = ({ db, settings,ws }) => async (req, res) => {
     else if (req.body.shipping === 'outside') req.body.shippingAmount = 150;
     req.body.estimatedTotal = req.body.subTotal + req.body.shippingAmount+tax+fee;
     req.body.orderNumber = new Date().getTime();
+    req.body.date = formatedDatestring();
 
     const order = await db.create({
       table: Order,
@@ -148,6 +149,21 @@ const generateDate = (days) => {
   const newDate = new Date(today);
   newDate.setDate(newDate.getDate() + days);
   return newDate.toDateString();
+};
+const formatedDatestring = () => {
+
+  const currentDate = new Date();
+  let hours = currentDate.getHours();
+  let amOrPm = 'AM';
+  if (hours >= 12) {
+    amOrPm = 'PM';
+  }
+  if (hours > 12) {
+    hours -= 12;
+  }
+  return `${currentDate.toLocaleString('default', { month: 'short' })} ${currentDate.getDate().toString().padStart(2, '0')}, ${currentDate.getFullYear()}, ${hours}:${currentDate.getMinutes().toString().padStart(2, '0')} ${amOrPm}`;
+
+
 };
 /**
  * fatch all orders list .
