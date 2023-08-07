@@ -1,11 +1,11 @@
 import Order from './order.schema';
 import Discount from '../discount/discount.schema';
 import SSLCommerzPayment from 'sslcommerz-lts';
-import Notification from '../notification/notification.schema';
+import { notify } from '../notification/notification.entity';
 
 
 
-const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shipping', 'canceled']);
+const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shipping', 'cancelled']);
 /**
  * Creates new order in the database based on the property of request body.
  *
@@ -115,16 +115,16 @@ export const addOrder = ({ db, settings,ws }) => async (req, res) => {
     sslcz.init(data).then(async(apiResponse) => {
       const GatewayPageURL = apiResponse.GatewayPageURL;
       res.status(200).send(GatewayPageURL);
-      const notification = await db.create({
-        table: Notification, key: {
+
+      notify({
+        db, ws, room: req.user.id, data: {
           user: req.user.id,
           type: 'prod',
           msg: 'Your Order has been placed. Please complete your payment.',
           url: '/'
+
         }
       });
-
-      if (notification) ws.to(req.user.id).emit('notification', { ...notification });
 
     });
 
@@ -211,16 +211,16 @@ export const updateOrderstatus = ({ db, ws }) => async (req, res) => {
     order.status = req.body.status;
     db.save(order);
     res.status(200).send(order);
-    const notification = await db.create({
-      table: Notification, key: {
+    console.log(order.user)
+    notify({
+      db, ws, room: order.user.toString(), data: {
         user: order.user,
         type: 'prod',
-        msg: order.status === 'completed' ? `your product for order no: ${order.orderNumber} has been delivered.` : order.status === 'processing' ? `We are currently processing your order ( Order no: ${order.orderNumber})` : order.status === 'shipping' ? `The shipping process of your order is started ( Order no: ${order.orderNumber})` : order.status === 'canceled' ? `Your order ( Order no: ${order.orderNumber}) has been canceled`: 'This is the autometed notification from the system',
+        msg: order.status === 'completed' ? `your product for order no: ${order.orderNumber} has been delivered.` : order.status === 'processing' ? `We are currently processing your order ( Order no: ${order.orderNumber})` : order.status === 'shipping' ? `The shipping process of your order is started ( Order no: ${order.orderNumber})` : order.status === 'cancelled' ? `Your order ( Order no: ${order.orderNumber}) has been canceled` : 'This is the autometed notification from the system',
         url: '/'
+
       }
     });
-
-    if (notification) ws.emit(order.user, notification);
 
   } catch (e) {
     console.log(e);
@@ -337,16 +337,17 @@ export const successPayment = ({ db, settings, ws }) => async (req, res) => {
     }
     await db.save(order);
     res.redirect(`http://localhost:5173/order-success/?status=${order.status}`);
-    const notification = await db.create({
-      table: Notification, key: {
+
+    notify({
+      db, ws, room: order.user.toString(), data: {
         user: order.user,
         type: 'prod',
         msg: `You have successfully paid the amount for your order no: ${order.orderNumber}`,
         url: '/'
+
       }
     });
 
-    if (notification) ws.emit(order.user, notification);
 
 
 

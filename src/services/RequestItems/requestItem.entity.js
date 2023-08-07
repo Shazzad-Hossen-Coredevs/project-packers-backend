@@ -4,6 +4,7 @@ import User from '../user/user.schema';
 import Product from '../product/product.schema';
 import Notification from '../notification/notification.schema';
 import jwt from 'jsonwebtoken';
+import { notify } from '../notification/notification.entity';
 
 const createAllowed = new Set(['name', 'link', 'quantity', 'thumbnails', 'notes','user']);
 const allowedQuery = new Set(['page', 'limit', '_id', 'paginate']);
@@ -133,16 +134,17 @@ export const sendInvoice = ({ db, settings, mail, ws }) => async (req, res) => {
     const result = await db.save(product);
     if (!result) return res.status(400).send({ error: true, message: 'Satus set to estimate-sent failed' });
     res.status(200).send(result);
-    const notification = await db.create({
-      table: Notification, key: {
+
+    notify({
+      db, ws, room: user.id, data: {
         user: user.id,
         type: 'prod',
         msg: 'Invoice for your requested product is sent to your email. Please check your email. We are waiting for your response.',
         url: '/'
+
       }
     });
 
-    if (notification) ws.emit(user.id, notification);
 
 
   } catch (error) {
@@ -220,16 +222,16 @@ export const sendtoCart = ({ db, mail, ws }) => async (req, res) => {
     });
     if (!mailRes) return res.status(400).send({ error: true, message: 'Sending mail  Failed' });
     res.status(200).send('Success');
-    const notification = await db.create({
-      table: Notification, key: {
+    
+    notify({
+      db, ws, room: user.id, data: {
         user: user.id,
         type: 'prod',
         msg: 'Your requested item is sent to your cart. Please check your cart and order the product.',
         url: '/'
+
       }
     });
-
-    if (notification) ws.emit(user.id, notification);
 
 
 

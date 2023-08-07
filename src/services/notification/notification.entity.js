@@ -13,3 +13,13 @@ export const myNotification = ({ db }) => async (req, res) => {
 
   }
 };
+
+
+export const notify = async ({ db, ws, room, data }) => {
+  const notification = await db.create({
+    table: Notification, key: { ...data }
+  });
+
+  if (notification) ws.to(room).emit('notification', notification);
+  return;
+};
