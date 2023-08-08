@@ -5,7 +5,7 @@ import discount from './discount/discount';
 import Image from './image/image';
 import order from './order/order';
 import product from './product/product';
-import support from './support/support';
+import support, { supportSocket } from './support/support';
 import user from './user/user';
 import graph from './graph/graph';
 import refund from './refund/refund';
@@ -23,6 +23,7 @@ export const services = (app) => {
   app.configure(graph);
   app.configure(refund);
   app.configure(notification);
+  supportSocket(app);
 
 
 };

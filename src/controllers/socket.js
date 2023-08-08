@@ -49,6 +49,7 @@ export function listen(io, events, ...middlewares) {
     io.on('connection', async ws => {
       console.log('Connected =>', ws.id);
       ws.on('disconnect', () => console.log('Diconnected =>', ws.id));
+      
       ws.onAny((event, ...args) => {
         events[event]?.method({ data: args[0], session: ws, ...events[event]?.props });
       });

@@ -211,7 +211,6 @@ export const updateOrderstatus = ({ db, ws }) => async (req, res) => {
     order.status = req.body.status;
     db.save(order);
     res.status(200).send(order);
-    console.log(order.user)
     notify({
       db, ws, room: order.user.toString(), data: {
         user: order.user,

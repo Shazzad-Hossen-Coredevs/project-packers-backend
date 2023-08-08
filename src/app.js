@@ -43,6 +43,7 @@ export default class App {
     this.db = operations;
     this.events = {};
     this.wsMiddlewares = [socketMiddleware];
+    // this.wsMiddlewares = [];
 
     if (deps) {
       let promises = deps.map(({ method, args }) => new Promise((resolve, reject) => method(...args).then(r => resolve(r)).catch((err) => reject(err))));
