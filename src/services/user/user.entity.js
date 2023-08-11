@@ -30,15 +30,13 @@ export const register = ({ db }) => async (req, res) => {
     const valid = Object.keys(req.body).every(k => createAllowed.has(k));
     if (!valid) return res.status(400).send('Bad request');
     req.body.password = await bcrypt.hash(req.body.password, 8);
-    db.create({ table: User, key: { ...req.body } })
-      .then(async user => {
-        if (!user) {
-          return res.status(400).send({ message: 'Email Already Exist' });
-        }
-        await db.save(user);
-        res.status(200).send(user);
-      })
-      .catch(({ message }) => res.status(400).send({ message }));
+    const user = await db.create({ table: User, key: { ...req.body } });
+    if (!user) {
+      return res.status(400).send('Email Already Exist');
+    }
+    await db.save(user);
+    res.status(200).send(user);
+
 
 
   }
@@ -62,9 +60,9 @@ export const login = ({ db, settings, ws }) => async (req, res) => {
   try {
     if (!req.body.email || !req.body.password) return res.status(400).send('Bad requests');
     const user = await db.findOne({ table: User, key: { email: req.body.email, populate: { path: 'cart.product' } } });
-    if (!user) return res.status(401).send('Unauthorized');
+    if (!user) return res.status(401).send('No user exist with this email');
     const isValid = await bcrypt.compare(req.body.password, user.password);
-    if (!isValid) return res.status(401).send('Unauthorized');
+    if (!isValid) return res.status(401).send('Invalid password');
     const token = jwt.sign({ id: user.id }, settings.secret);
     res.cookie(settings.secret, token, {
       httpOnly: true,
