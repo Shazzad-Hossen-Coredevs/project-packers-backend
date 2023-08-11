@@ -8,10 +8,12 @@ const schema = new Schema(
     status: { type: String, enum: ['pending', 'open', 'closed'], default: 'pending' },
     sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     staff: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    message: { type: String, required: true },
     chats: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        message: { type: String, required: true }
+        message: { type: String, required: true },
+        date: { type: Date, default: new Date()}
       }
 
     ]

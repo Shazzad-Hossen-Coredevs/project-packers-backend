@@ -11,15 +11,20 @@ import Support from './support.schema';
 export const createChat = ({ db, ws }) => async (req, res) => {
 
   try {
+
+    //db.removeAll({ table: Support });
     const data = {
       chats: [{ user: req.user.id, message: req.body.message }],
       sender: req.user.id,
     };
-    delete req.body.message;
-    const chat = await db.create({ table: Support, key: { ...data, ...req.body } });
+    req.body.message;
+    const chat = await db.create({ table: Support, key: { ...data, ...req.body, populate: { path: 'chats.user', select: 'id name'} } });
     if (!chat) return res.status(400).send('Something wents wrong');
     res.send(chat);
-    ws.to('supportRoom').emit('support', chat);
+
+    ws.to('supportRoom').emit('newChat', chat);
+
+
 
   }
   catch (e) {
@@ -33,6 +38,7 @@ export const createChat = ({ db, ws }) => async (req, res) => {
 
 export const acceptChat = ({ db }) => async (req, res) => {
   try {
+
     if (!req.params.id) return res.status(400).send('Chat id missing in params');
     const chat = await db.findOne({ table: Support, key: { id: req.params.id } });
     if (!chat) return res.status(400).send('Something wents wrong');
@@ -48,13 +54,34 @@ export const acceptChat = ({ db }) => async (req, res) => {
   }
 };
 
-export const addMsg = ({ db }) => async (req, res) => {
+export const addMsg = ({ db, ws }) => async (req, res) => {
   try {
     const { id, message } = req.body;
     if (!id || !message) return res.status(400).send(' Missing id and message in body');
     const chat = await db.findOne({ table: Support, key: { id: id } });
     if (!chat) return res.status(400).send('Somethiung wents wrong');
-    console.log(chat)
+    chat.chats.unshift({
+      user: req.user.id,
+      message: message,
+    });
+    const result = await db.save(chat);
+    res.status(200).send(result);
+    ws.to(result.id).emit('supportChat',result);
+
+  } catch (e) {
+    console.log(e);
+    res.status(500).send('Something went wrong.');
+  }
+};
+
+
+
+
+export const getAll = ({ db }) => async (req, res) => {
+  try {
+    const chats = await db.find({ table: Support, key:{ populate:{ path:'chats.user', select:' id name' }} });
+    if (!chats) return res.status(400).send('Something wents wrong');
+    res.status(200).send(chats);
 
   } catch (e) {
     console.log(e);
@@ -65,6 +92,7 @@ export const addMsg = ({ db }) => async (req, res) => {
 export const joinRoom = async ({ data, session }) => {
   try {
     session['join'](data);
+    console.log('A user connected to room => ', data);
 
   } catch (error) {
     console.log(error);
