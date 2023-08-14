@@ -4,7 +4,7 @@ import paginate from 'mongoose-paginate-v2';
 const schema = new Schema(
   {
     user: { type: String, required: true },
-    type: { type: String, required: true },
+    type: { type: String, enum:['gen','prod'], required: true },
     msg: { type: String, required: true },
     url: { type: String, required: true }
   },

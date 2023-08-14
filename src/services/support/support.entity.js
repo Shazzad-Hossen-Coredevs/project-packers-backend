@@ -1,4 +1,7 @@
 import Support from './support.schema';
+
+const createAllowed = new Set(['type', 'order', 'sender', 'message']);
+
 /**
  * Creates a new user in the database with the specified properties in the request body.
  * The 'role' property is automatically set to 'user', and the 'password' property is hashed using bcrypt.
@@ -13,16 +16,15 @@ export const createChat = ({ db, ws }) => async (req, res) => {
   try {
 
     //db.removeAll({ table: Support });
-    const data = {
-      chats: [{ user: req.user.id, message: req.body.message }],
-      sender: req.user.id,
-    };
-    req.body.message;
-    const chat = await db.create({ table: Support, key: { ...data, ...req.body, populate: { path: 'chats.user', select: 'id name'} } });
+    req.body.sender = req.user;
+    const valid = Object.keys(req.body).every(k => createAllowed.has(k));
+    if (!valid) return res.status(400).send('Invalid body object');
+    const chat = await db.create({ table: Support, key: { ...req.body, populate: { path: 'sender', select: ' id name avatar' } } });
     if (!chat) return res.status(400).send('Something wents wrong');
-    res.send(chat);
+    res.status(200).send(chat);
 
-    ws.to('supportRoom').emit('newChat', chat);
+
+    // ws.to('supportRoom').emit('newChat', chat);
 
 
 
@@ -75,11 +77,23 @@ export const addMsg = ({ db, ws }) => async (req, res) => {
 };
 
 
+export const getOne = ({ db }) => async (req, res) => {
+  try {
+    // if (!req.params.id) return res.status(400).send('Missing id in request params');
+    // const chats = await db.findOne({ table: Support, key:{ id: req.params.id} });
+    // if (!chats) return res.status(400).send('Something wents wrong');
+    // res.status(200).send(chats);
 
+
+  } catch (e) {
+    console.log(e);
+    res.status(500).send('Something went wrong.');
+  }
+};
 
 export const getAll = ({ db }) => async (req, res) => {
   try {
-    const chats = await db.find({ table: Support, key:{ populate:{ path:'chats.user', select:' id name' }} });
+    const chats = await db.find({ table: Support });
     if (!chats) return res.status(400).send('Something wents wrong');
     res.status(200).send(chats);
 

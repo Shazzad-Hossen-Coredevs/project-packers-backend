@@ -1,5 +1,5 @@
 import { auth } from '../middlewares';
-import { acceptChat, addMsg, createChat, getAll, joinRoom, leaveRoom } from './support.entity';
+import { acceptChat, addMsg, createChat, getAll, getOne, joinRoom, leaveRoom } from './support.entity';
 
 export default function support() {
 
@@ -9,6 +9,12 @@ export default function support() {
   * @response {Object} 200 - the new user.
   */
   this.route.get('/support', auth, getAll(this));
+  /**
+* GET /support/:id
+* @description This route is used to create a new suport chat.
+* @response {Object} 200 - the new user.
+*/
+  this.route.get('/support/:id', auth, getOne(this));
   /**
 * POST /support
 * @description This route is used to create a new suport chat.
