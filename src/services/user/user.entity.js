@@ -86,11 +86,15 @@ export const login = ({ db, settings, ws }) => async (req, res) => {
  * @param {Object} res this is the response object
  * @returns It returns encrypted token as success response and otp on the mail. Otherwise it will through an error.
  */
-export const generateOtp = ({ settings, mail }) => async (req, res) => {
+export const generateOtp = ({ db, settings, mail }) => async (req, res) => {
 
 
 
   try {
+
+    const user = await db.findOne({ table: User, key: { email: req.body.email} });
+    if (!user) return res.status(400).send('Email not found');
+
     const otp = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
     if (req.body.email) {
       const token = jwt.sign(

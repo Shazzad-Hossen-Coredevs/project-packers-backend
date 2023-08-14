@@ -9,15 +9,6 @@ const schema = new Schema(
     sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     staff: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     message: { type: String, required: true },
-    chats: [
-      {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        message: { type: String, required: true },
-        date: { type: Date, default: new Date()}
-      }
-
-    ]
-
 
   },
   { timestamps: true }
