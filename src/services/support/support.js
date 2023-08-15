@@ -9,12 +9,7 @@ export default function support() {
   * @response {Object} 200 - the new user.
   */
   this.route.get('/support', auth, getAll(this));
-  /**
-* GET /support/:id
-* @description This route is used to create a new suport chat.
-* @response {Object} 200 - the new user.
-*/
-  this.route.get('/support/:id', auth, getOne(this));
+
   /**
 * POST /support
 * @description This route is used to create a new suport chat.
@@ -28,12 +23,7 @@ export default function support() {
  * @response {Object} 200 - the new user.
  */
   this.route.post('/support/:id', auth, acceptChat(this));
-  /**
-  * PATCH /support
-  * @description This route is used to create a new suport chat.
-  * @response {Object} 200 - the new user.
-  */
-  this.route.patch('/support', auth, addMsg(this));
+
 
 
 }

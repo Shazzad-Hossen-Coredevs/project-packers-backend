@@ -12,7 +12,7 @@ import Product from '../product/product.schema';
  */
 const createAllowed = new Set(['name', 'email', 'password', 'phone', 'role', 'avatar', 'shippingAddress', 'fbId']);
 const allowedQuery = new Set(['name', 'page', 'limit', 'id', 'paginate', 'role', 'sortBy', 'search']);
-const ownUpdateAllowed = new Set(['name', 'phone', 'avatar', 'passwordChange']);
+const ownUpdateAllowed = new Set(['name', 'phone', 'email', 'password']);
 
 /**
  * Creates a new user in the database with the specified properties in the request body.
@@ -294,23 +294,19 @@ const setPassword = async ({ oldPass, newPass, user }) => {
  * @param {Object} res this is the response object
  * @returns It returns the updated data.
  */
-export const updateOwn = ({ db, imageUp }) => async (req, res) => {
+export const updateOwn = ({ db }) => async (req, res) => {
 
   try {
 
-    if (req.files?.avatar?.path) {
-      req.body = JSON.parse(req.body.data || '{}');
-      req.body.avatar = await imageUp(req.files?.avatar.path);
-    }
     const isValid = Object.keys(req.body).every(k => ownUpdateAllowed.has(k));
     if (!isValid) return res.status(400).send('Bad request');
-    if (req.body.passwordChange) {
-      req.body.password = await setPassword({ oldPass: req.body.passwordChange.oldPass, newPass: req.body.passwordChange.newPass, user: req.user });
-      delete req.body.passwordChange;
+    if (req.body.password) {
+      req.body.password = await setPassword({ oldPass: req.body.password.old, newPass: req.body.password.new, user: req.user });
     }
     Object.keys(req.body).forEach(k => (req.user[k] = req.body[k]));
     await db.save(req.user);
     res.status(200).send(req.user);
+    
   }
   catch (err) {
     console.log(err);

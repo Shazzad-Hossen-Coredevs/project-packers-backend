@@ -24,7 +24,7 @@ export const createChat = ({ db, ws }) => async (req, res) => {
     res.status(200).send(chat);
 
 
-    // ws.to('supportRoom').emit('newChat', chat);
+    ws.to('supportRoom').emit('newChat', chat);
 
 
 
@@ -56,40 +56,7 @@ export const acceptChat = ({ db }) => async (req, res) => {
   }
 };
 
-export const addMsg = ({ db, ws }) => async (req, res) => {
-  try {
-    const { id, message } = req.body;
-    if (!id || !message) return res.status(400).send(' Missing id and message in body');
-    const chat = await db.findOne({ table: Support, key: { id: id } });
-    if (!chat) return res.status(400).send('Somethiung wents wrong');
-    chat.chats.unshift({
-      user: req.user.id,
-      message: message,
-    });
-    const result = await db.save(chat);
-    res.status(200).send(result);
-    ws.to(result.id).emit('supportChat',result);
 
-  } catch (e) {
-    console.log(e);
-    res.status(500).send('Something went wrong.');
-  }
-};
-
-
-export const getOne = ({ db }) => async (req, res) => {
-  try {
-    // if (!req.params.id) return res.status(400).send('Missing id in request params');
-    // const chats = await db.findOne({ table: Support, key:{ id: req.params.id} });
-    // if (!chats) return res.status(400).send('Something wents wrong');
-    // res.status(200).send(chats);
-
-
-  } catch (e) {
-    console.log(e);
-    res.status(500).send('Something went wrong.');
-  }
-};
 
 export const getAll = ({ db }) => async (req, res) => {
   try {

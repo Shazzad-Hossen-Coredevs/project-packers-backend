@@ -10,6 +10,7 @@ import user from './user/user';
 import graph from './graph/graph';
 import refund from './refund/refund';
 import notification from './notification/notification';
+import chat from './chat/chat';
 export const services = (app) => {
   app.configure(demo);
   app.configure(user);
@@ -23,6 +24,7 @@ export const services = (app) => {
   app.configure(graph);
   app.configure(refund);
   app.configure(notification);
+  app.configure(chat);
   supportSocket(app);
 
 
