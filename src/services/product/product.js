@@ -1,16 +1,16 @@
-import { addProduct, deleteProduct, getProducts, getSingleProduct, requestProduct, updateProduct } from './product.entity';
+import { addProduct, deleteProduct, getProducts, getSingleProduct, updateProduct } from './product.entity';
 
 export default function product() {
   /**
-   * POST /user
+   * POST /product
    * @description This route is used to create a product.
    * @request {Object} -product details object.
    * @response {oblect} - acknowledgement true.
    */
   this.route.post('/product', addProduct(this));
   /**
-   * POST /user
-   * @description This route is used to create a product.
+   * GET /product
+   * @description This route is used to fetch all products.
    * @request {Object} -product details object.
    * @response {oblect} - acknowledgement true.
    */
@@ -36,5 +36,5 @@ export default function product() {
    * @response {oblect} - acknowledgement true.
    */
   this.route.delete('/product/:id', deleteProduct(this));
-  
+
 }

@@ -1,6 +1,6 @@
 import Product from './product.schema';
-const createAllowed = new Set(['name', 'desc', 'price', 'from', 'whereToBuy', 'develeryTime', 'thumbnails', 'category', 'subCategory', 'quantity', 'link', 'status', 'stock','tax','fee']);
-const allowedQuery = new Set(['page', 'limit', '_id', 'paginate', 'status']);
+const createAllowed = new Set(['name', 'desc', 'price', 'from', 'deliveryTime', 'thumbnails', 'category', 'subCategory', 'link', 'stock','tax','fee']);
+const allowedQuery = new Set(['page', 'limit', '_id', 'paginate', 'status', 'category']);
 const ownUpdateAllowed = new Set(['name', 'desc', 'price', 'from', 'whereToBuy', 'develeryTime', 'thumbnails', 'category', 'subCategory', 'quantity', 'link', 'status', 'stock', 'tax', 'fee']);
 
 
@@ -61,7 +61,7 @@ export const getProducts = ({ db }) => async (req, res) => {
   try {
 
 
-    db.find({ table: Product, key: { query: req.query, allowedQuery: allowedQuery, paginate: true } })
+    db.find({ table: Product, key: { query: req.query, allowedQuery: allowedQuery, paginate: req.query.paginate === 'true', populate:{ path: 'category'} } })
       .then(async product => {
         if (!product) {
           return res.status(400).send({ message: 'Something Wents Wrong' });
@@ -155,3 +155,14 @@ export const deleteProduct = ({ db }) => async (req, res) => {
     res.status(500).send('Something went wrong.');
   }
 };
+
+export const relatedProducts = ({ db }) => async (req, res) => {
+  try {
+    console.log(req.body)
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send('Something wents wrong');
+
+  }
+}

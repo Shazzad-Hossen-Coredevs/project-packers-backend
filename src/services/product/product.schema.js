@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
 const schema = new Schema(
@@ -12,13 +12,13 @@ const schema = new Schema(
     link: { type: String, required: true },
     from: { type: String, required: true },
     whereToBuy: { type: String, required: true },
-    develeryTime: {
+    deliveryTime: {
       min: { type: Number, required: true },
       max: { type: Number, required: true }
     },
     tax: { type: Number, default: 0 },
     fee: { type: Number, default: 0 },
-    category: { type: String, required: true },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     subCategory: { type: String, required: true },
   },
   { timestamps: true }
