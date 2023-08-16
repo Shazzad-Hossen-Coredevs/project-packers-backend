@@ -20,6 +20,7 @@ const schema = new Schema(
     fee: { type: Number, default: 0 },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     subCategory: { type: String, required: true },
+    tags: { type : String }
   },
   { timestamps: true }
 );

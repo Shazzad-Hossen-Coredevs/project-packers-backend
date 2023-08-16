@@ -11,8 +11,8 @@ export const addCategory = ({ db }) => async (req, res) => {
 
   try {
     const result =  await db.create({ table: Category, key: { ...req.body } });
-    if (!result) return res.status(400).send({ error: true, message: 'Category Already exist' });
-    res.status(200).send({ acknowledgement: true, message:'Category successfully added'});
+    if (!result) return res.status(400).send('Category Already exist');
+    res.status(200).send(result);
   }
   catch (e) {
     console.log(e);
@@ -51,13 +51,13 @@ export const getCategories = ({ db }) => async (req, res) => {
 export const addSubcategory = ({ db }) => async (req, res) => {
   try {
     const category = await db.findOne({ table: Category, key: { id: req.body.id } });
-    if (!category) return res.status(400).send({ error: true, message: 'Category not found' });
+    if (!category) return res.status(400).send('Category not found');
     const isSub = category.subCategory.find(elem => elem.name === req.body.name);
     const isSlug = category.subCategory.find(elem => elem.slug === req.body.slug);
-    if (isSub || isSlug) return res.status(400).send({ error: true, message: 'Sub-categorie already exists' });
+    if (isSub || isSlug) return res.status(400).send('Sub-categorie already exist');
     category.subCategory.push({ name: req.body.name, slug: req.body.slug });
-    db.save(category);
-    res.status(200).send({ acknowledgement: true, message: 'Sub-category successfully added' });
+    const result = await db.save(category);
+    res.status(200).send(result);
 
 
   } catch (e) {
