@@ -1,4 +1,5 @@
 import Category from '../category/category.schema';
+const allowedQuery = new Set(['page', 'limit', 'paginate']);
 /**
  * This function is use to create a new Category.
  *
@@ -29,7 +30,7 @@ export const addCategory = ({ db }) => async (req, res) => {
  */
 export const getCategories = ({ db }) => async (req, res) => {
   try {
-    const result = await db.find({ table: Category });
+    const result = await db.find({ table: Category, key: { query: req.query, allowedQuery: allowedQuery, paginate: req.query.paginate === 'true' }});
     if (!result) return res.status(400).send({ error: true, message: 'Something wents wrong' });
     res.status(200).send(result);
 
