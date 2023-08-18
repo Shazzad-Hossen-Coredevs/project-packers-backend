@@ -7,12 +7,9 @@ import Discount from './discount.schema';
  */
 export const createDiscount = ({ db }) => async (req, res) => {
   try {
-    const result = await db.create({ table: Discount, key: { ...req.body } });
-    if (!result) return res.status(400).send({ error: true, message: 'Discount Code already exists.Try new code' });
-    res.status(200).send({
-      acknowledgement: true,
-      message: 'Discount successfully added.',
-    });
+    const result = await db.create({ table: Discount, key: { ...req.body , populate: { path: 'category'} } });
+    if (!result) return res.status(400).send('Discount Code already exists.Try new code' );
+    res.status(200).send(result);
   } catch (e) {
     console.log(e);
     res.status(500).send('Something went wrong.');
@@ -33,12 +30,12 @@ export const checkValidity = ({ db }) => async (req, res) => {
       key: { code: req.body.code },
     });
     if (!result)
-      return res.status(400).send({ error: true, message: 'Invalid discount code' });
+      return res.status(400).send('Invalid discount code');
     if ((result.expiresIn - new Date()) < 0)
-      return res.status(400).send({ error: true, message: 'Discount code is already expired' });
-    const isFound = result.user.find((user) => user.id === req.body.userId);
+      return res.status(400).send('Discount code is already expired');
+    const isFound = result.user.find((user) => user.id === req.user.id);
     if (isFound)
-      return res.status(400).send({ error: true, message: 'You already applied this discount code before' });
+      return res.status(400).send('You already applied this discount code before');
     result.limit -= 1;
     db.save(result);
     res.status(200).send(result);

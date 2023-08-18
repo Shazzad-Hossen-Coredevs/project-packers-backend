@@ -1,11 +1,11 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
 const schema = new Schema(
   {
     code: { type: String, required: true, unique: true },
     description: { type: String, required: true },
-    category: { type: String, required: true },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     subCategory: { type: String, required: true },
     amount: { type: Number, required: true },
     type: { type: String, required: true },

@@ -370,6 +370,7 @@ export const addTocart = ({ db }) => async (req, res) => {
       req.user.cart.push({ product: req.body.productId, quantity: req.body.quantity });
     }
     db.save(req.user);
+    await db.populate(req.user, { path: 'cart.product' });
     res.status(200).send(req.user);
 
   } catch (err) {
@@ -386,15 +387,19 @@ export const addTocart = ({ db }) => async (req, res) => {
 export const updateCart = ({ db }) => async (req, res) => {
 
   try {
+
+
     req.user.cart = [];
-    for (let i = 0; i < req.body.cart.length; i++) {
-      if (req.body.cart[i].quantity < 1) continue;
-      req.user.cart.push({
-        product: req.body.cart[i].productId,
-        quantity: req.body.cart[i].quantity,
-      });
-    }
-    db.save(req.user);
+    req.body.cart.forEach(item => {
+
+      if (item.quantity > 0) {
+        req.user.cart.push({ product: item?.product?.id, quantity: item.quantity });
+      }
+
+    });
+    console.log(req.user.cart);
+    await db.save(req.user);
+    await db.populate(req.user, { path: 'cart.product' });
     res.status(200).send(req.user);
 
 
