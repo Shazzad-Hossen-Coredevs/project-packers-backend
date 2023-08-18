@@ -306,7 +306,7 @@ export const updateOwn = ({ db }) => async (req, res) => {
     Object.keys(req.body).forEach(k => (req.user[k] = req.body[k]));
     await db.save(req.user);
     res.status(200).send(req.user);
-    
+
   }
   catch (err) {
     console.log(err);
@@ -362,7 +362,7 @@ export const remove = ({ db }) => async (req, res) => {
 export const addTocart = ({ db }) => async (req, res) => {
   try {
     const product = await db.findOne({ table: Product, key: { id: req.body.productId } });
-    if (!product) return res.status(400).send({ error: true, message: 'Product not Found' });
+    if (!product) return res.status(400).send('Product not Found');
     const cartItem = req.user.cart.find(item => item.product.equals(req.body.productId,));
     if (cartItem) {
       cartItem.quantity += req.body.quantity;
@@ -370,11 +370,11 @@ export const addTocart = ({ db }) => async (req, res) => {
       req.user.cart.push({ product: req.body.productId, quantity: req.body.quantity });
     }
     db.save(req.user);
-    res.status(200).send({ acknowledgement: true, message: 'Successfully added to cart' });
+    res.status(200).send(req.user);
 
   } catch (err) {
     console.log(err);
-    res.status(500).send({ message: 'Something went wrong' });
+    res.status(500).send('Something went wrong');
   }
 };
 /**
