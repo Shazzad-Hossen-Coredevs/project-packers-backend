@@ -5,7 +5,7 @@ export default function support() {
 
   /**
   * GET /support
-  * @description This route is used to create a new suport chat.
+  * @description This route is used to get all support chat request.
   * @response {Object} 200 - the new user.
   */
   this.route.get('/support', auth, getAll(this));
@@ -19,14 +19,13 @@ export default function support() {
 
   /**
  * POST /support/:id
- * @description This route is used to create a new suport chat.
+ * @description This route is used to accept a support chat request.
  * @response {Object} 200 - the new user.
  */
   this.route.post('/support/:id', auth, acceptChat(this));
 
-
-
 }
+//these are the socket event to join or leave  a room
 export const supportSocket = (app) => {
   app.register('joinRoom', joinRoom);
   app.register('leaveRoom', leaveRoom);

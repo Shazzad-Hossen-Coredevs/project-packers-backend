@@ -1,6 +1,13 @@
 import Notification from '../notification/notification.schema';
 const allowedQuery = new Set(['page', 'limit', 'paginate']);
 
+
+/**
+ * This function is get user notification.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+*/
 export const myNotification = ({ db }) => async (req, res) => {
   try {
     const notifications = await db.find({ table: Notification, key: { user: req.user.id, query: req.query, allowedQuery: allowedQuery, paginate: req.query.paginate === 'true' } });
@@ -15,7 +22,12 @@ export const myNotification = ({ db }) => async (req, res) => {
   }
 };
 
-
+/**
+ * This function is used send notification.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+*/
 export const notify = async ({ db, ws, room, data }) => {
 
   const notification = await db.create({

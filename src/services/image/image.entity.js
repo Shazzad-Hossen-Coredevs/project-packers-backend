@@ -11,7 +11,6 @@ export const serveImage = () => async (req, res) => {
     const imagePath = path.join(path.resolve(), 'images', req.params.id);
     res.status(200).sendFile(imagePath);
 
-
   } catch (error) {
     console.log(error);
     res.status(500).send('Something wents wrong');

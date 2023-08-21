@@ -2,13 +2,11 @@ import { generateMail } from '../../controllers/email/template/generateMail';
 import RequestItem from './requestItem.schema';
 import User from '../user/user.schema';
 import Product from '../product/product.schema';
-import Notification from '../notification/notification.schema';
 import jwt from 'jsonwebtoken';
 import { notify } from '../notification/notification.entity';
-
 const createAllowed = new Set(['name', 'link', 'quantity', 'thumbnails', 'notes','user']);
 const allowedQuery = new Set(['page', 'limit', '_id', 'paginate']);
-const updateAllowed = new Set(['name', 'link', 'whereToBuy', 'quantity', 'thumbnails', 'notes','status','tax','fee','stock','price']);
+
 /**
  * This function is used for Request a new product which will add a collection in table RequestItems.
  * @param {Object} req This is the request object.
@@ -102,7 +100,12 @@ export const updateProduct = ({ db }) => async (req, res) => {
 
 };
 
-
+/**
+ * This function is used for sending invoice to a user againt a request item.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
 export const sendInvoice = ({ db, settings, mail, ws }) => async (req, res) => {
   try {
     if (!req.body.id) return res.status(400).send({ error: true, message: 'id missing in request body' });
@@ -154,7 +157,12 @@ export const sendInvoice = ({ db, settings, mail, ws }) => async (req, res) => {
   }
 };
 
-
+/**
+ * This function is used to receive responce from user
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
 export const invoiceResponse = ({ db, settings}) => async (req, res) => {
   try {
     //redirect url will be change
@@ -174,6 +182,12 @@ export const invoiceResponse = ({ db, settings}) => async (req, res) => {
   }
 
 };
+/**
+ * This function is used to add  a requested item to product list so that user can directly order it from  website.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
 
 export const addtoProduct = ({ db }) => async (req, res) => {
   try {
@@ -199,6 +213,12 @@ export const addtoProduct = ({ db }) => async (req, res) => {
 
 };
 
+/**
+ * This function is used to send the product to users cart.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
 export const sendtoCart = ({ db, mail, ws }) => async (req, res) => {
   try {
     if (!req.body.id) return res.status(400).send('Requested product id missing in request body');
@@ -222,7 +242,7 @@ export const sendtoCart = ({ db, mail, ws }) => async (req, res) => {
     });
     if (!mailRes) return res.status(400).send({ error: true, message: 'Sending mail  Failed' });
     res.status(200).send('Success');
-    
+
     notify({
       db, ws, room: user.id, data: {
         user: user.id,
@@ -232,11 +252,6 @@ export const sendtoCart = ({ db, mail, ws }) => async (req, res) => {
 
       }
     });
-
-
-
-
-
 
   } catch (error) {
     console.log(error);

@@ -9,26 +9,26 @@ export default function category() {
   */
   this.route.post('/category', addCategory(this));
   /**
-  * POST /category
+  * GET /category
   * @description This route is used to get all category.
   * @response {Object} 200 - the new user.
   */
   this.route.get('/category', getCategories(this));
   /**
-  * POST /category
-  * @description This route is used to get all category.
+  * DELETE /category/:id
+  * @description This route is used to delete a specific category.
   * @response {Object} 200 - the new user.
   */
   this.route.delete('/category/:id', deletecategory(this));
   /**
-  * POST /category
+  * POST /category-sub
   * @description This route is used to add new sub-categories.
   * @response {Object} 200 - the new user.
   */
   this.route.post('/category-sub', addSubcategory(this));
   /**
-  * POST /category
-  * @description This route is used to add new sub-categories.
+  * DELETE /category-sub/:id
+  * @description This route is used to delete a sub category
   * @response {Object} 200 - the new user.
   */
   this.route.delete('/category-sub/:id', deleteSubcategory(this));

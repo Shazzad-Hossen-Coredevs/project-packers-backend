@@ -47,14 +47,14 @@ export default function RequestItem() {
   this.route.get('/request-product/invoice/:token', invoiceResponse(this));
   /**
    * GET /request-product/:id'
-   * @description This route is used to get all requested product.
+   * @description This route is used to get a single requested product.
    * @request {Object} -product details object.
    * @response {oblect} - acknowledgement true.
    */
   this.route.get('/request-product/:id', getSingleProduct(this));
   /**
    * PATCH /request-product/:id
-   * @description This route is used to get all requested product.
+   * @description This route is used to update a requested product.
    * @request {Object} -product details object.
    * @response {oblect} - acknowledgement true.
    */

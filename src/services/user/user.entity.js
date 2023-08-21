@@ -81,7 +81,7 @@ export const login = ({ db, settings, ws }) => async (req, res) => {
   }
 };
 /**
- * This function is used for login a user.
+ * This function is used for generate otp.
  * @param {Object} req This is the request object.
  * @param {Object} res this is the response object
  * @returns It returns encrypted token as success response and otp on the mail. Otherwise it will through an error.
@@ -130,7 +130,7 @@ export const generateOtp = ({ db, settings, mail }) => async (req, res) => {
   }
 };
 /**
- * This function is used for login a user.
+ * This function is used to verify otp.
  * @param {Object} req This is the request object.In request body it will receive object {otp, token}
  * @param {Object} res this is the response object
  * @returns It returns the encrypted token as success response. Otherwise it will through an error.
@@ -340,7 +340,12 @@ export const updateUser = ({ db, imageUp }) => async (req, res) => {
   }
 };
 
-
+/**
+ * This function is used to delete a user from database
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
 export const remove = ({ db }) => async (req, res) => {
   try {
     const { id } = req.params;

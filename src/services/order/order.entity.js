@@ -17,21 +17,21 @@ const ownUpdateAllowed = new Set(['completed', 'pending', 'processing', 'shippin
 export const addOrder = ({ db, settings,ws }) => async (req, res) => {
 
   try {
-    if (!req.user.cart.length) return res.status(400).send({ error: true, message: 'You can not order while your cart is empty' });
-    if (!paramsValidator(req.body, ['shipping', 'contact', 'shippingAddress'])) return res.status(400).send({ error: true, message: ' body object must have shipping, contact, shippingAddress' });
-    if (!paramsValidator(req.body.contact, ['email', 'phone'])) return res.status(400).send({ error: true, message: 'contact object must have email and phone' });
-    if (!req.body.contact.phone.primary) return res.status(400).send({ error: true, message: 'Primary phone number missing in contact information' });
+    if (!req.user.cart.length) return res.status(400).send('You can not order while your cart is empty');
+    if (!paramsValidator(req.body, ['shipping', 'contact', 'shippingAddress'])) return res.status(400).send(' body object must have shipping, contact, shippingAddress');
+    if (!paramsValidator(req.body.contact, ['email', 'phone'])) return res.status(400).send('contact object must have email and phone');
+    if (!req.body.contact.phone.primary) return res.status(400).send('Primary phone number missing in contact information');
     if (req.body.code) {
-      const discount = await db.findOne({ table: Discount, key: { code: req.body.code } });
+      const discount = await db.findOne({ table: Discount, key: { code: req.body.code , populate: { path: 'category'}} });
       if (!discount) return res.status(400).send({ error: true, message: ' Invalid discount code' });
-      if ((discount.expiresIn - new Date()) < 0) return res.status(400).send({ error: true, message: 'Discount code is already expired' });
+      if ((discount.expiresIn - new Date()) < 0) return res.status(400).send('Discount code is already expired');
       const isFound = discount.user.find((user) => user === req.user.id);
-      if (isFound) return res.status(400).send({ error: true, message: 'You already applied this discount code before' });
+      if (isFound) return res.status(400).send('You already applied this discount code before');
       req.discount = discount;
     }
-    if (!req.body.shippingAddress) return res.status(400).send({ error: true, message: 'Shipping address missing in request body' });
+    if (!req.body.shippingAddress) return res.status(400).send( 'Shipping address missing in request body');
     const isValid = paramsValidator(req.body.shippingAddress, ['name', 'address', 'city', 'area', 'zip']);
-    if (!isValid) return res.status(400).send({ error: true, message: 'Invalid shipping address' });
+    if (!isValid) return res.status(400).send('Invalid shipping address');
     req.user.shippingAddress = req.body.shippingAddress;
     let dTotal = 0, nTotal = 0;
 
@@ -43,14 +43,14 @@ export const addOrder = ({ db, settings,ws }) => async (req, res) => {
       tax += prod.product.tax;
       fee += prod.product.fee;
 
-      if (prod.product.develeryTime.max > estimatedDtime.max) {
-        estimatedDtime.max = prod.product.develeryTime.max;
-        estimatedDtime.min = prod.product.develeryTime.min;
+      if (prod.product.deliveryTime.max > estimatedDtime.max) {
+        estimatedDtime.max = prod.product.deliveryTime.max;
+        estimatedDtime.min = prod.product.deliveryTime.min;
       }
 
 
       req.discount &&
-        prod.product.category === req.discount.category &&
+        prod.product.category.toString() === req.discount.category._id.toString() &&
         prod.product.subCategory === req.discount.subCategory
         ? (dTotal += prod.product.price * prod.quantity)
         : (nTotal += prod.product.price * prod.quantity);
@@ -74,7 +74,7 @@ export const addOrder = ({ db, settings,ws }) => async (req, res) => {
       table: Order,
       key: { ...req.body, products: req.user.cart, user: req.user.id, estimatedDtime, populate: { path: 'products.product user', select: '_id shippingAddress name email phone avatar thumbnails price  category' } },
     });
-    if (!order) return res.status(400).send({ error: true, message: 'Order creation failed' });
+    if (!order) return res.status(400).send('Order creation failed');
     if (req.discount) {
       req.discount.user.push(req.user.id);
       db.save(req.discount);
@@ -182,7 +182,7 @@ export const getOrders = ({ db }) => async (req, res) => {
         populate: { path: 'user products.product', select: 'name email phone avatar shippingAddress _id  thumbnails desc price from whereToBuy category subCategory ' }
       },
     });
-    if (!orders) return res.status(200).send({ error: true, mesage: 'Failed to fetch data' });
+    if (!orders) return res.status(200).send('Failed to fetch data');
     res.status(200).send(orders);
 
   } catch (e) {
@@ -203,11 +203,11 @@ export const getOrders = ({ db }) => async (req, res) => {
 export const updateOrderstatus = ({ db, ws }) => async (req, res) => {
   try {
     const isValid = paramsValidator(req.body, ['id', 'status']);
-    if (!isValid) return res.status(400).send({ error: true, message: ' Invalid body object keys' });
-    if (!ownUpdateAllowed.has(req.body.status)) return res.status(400).send({ error: true, mesage: 'Invalid status' });
+    if (!isValid) return res.status(400).send(' Invalid body object keys');
+    if (!ownUpdateAllowed.has(req.body.status)) return res.status(400).send('Invalid status');
 
     const order = await db.findOne({ table: Order, key: { id: req.body.id } });
-    if (!order) return res.status(400).send({ error: true, message: 'Order not found' });
+    if (!order) return res.status(400).send('Order not found');
     order.status = req.body.status;
     db.save(order);
     res.status(200).send(order);
@@ -239,7 +239,7 @@ export const deleteOrder = ({ db }) => async (req, res) => {
   try {
 
     const isFound = await db.findOne({ table: Order, key: { id: req.params.id } });
-    if (!isFound) return res.status(400).send({ error: true, message: 'Order not Found' });
+    if (!isFound) return res.status(400).send( 'Order not Found');
     isFound.remove();
     res.status(200).send({ acknowledgement: true });
 
@@ -279,7 +279,7 @@ export const singleOrder = ({ db }) => async (req, res) => {
   try {
 
     const order = await db.findOne({ table: Order, key: { id: req.params.id, populate: { path: 'products.product' } } });
-    if (!order) return res.send({ error: true, message: 'Something wents wrong!' });
+    if (!order) return res.send('Something wents wrong!');
     res.status(200).send(order);
 
   } catch (e) {
@@ -308,6 +308,14 @@ export const userOrder = ({ db }) => async (req, res) => {
   }
 };
 
+/**
+ * this function is used after oder completiuon and payment success.
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const successPayment = ({ db, settings, ws }) => async (req, res) => {
   try {
 
@@ -360,6 +368,15 @@ export const successPayment = ({ db, settings, ws }) => async (req, res) => {
 
   }
 };
+
+/**
+ * This function is used after paymenmt failed.
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const failPayment = () => async (req, res) => {
   try {
     //redirect url will be change .
@@ -371,6 +388,14 @@ export const failPayment = () => async (req, res) => {
 
   }
 };
+/**
+ * This function is used after payment canceled
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const cancelPayment = () => async (req, res) => {
   try {
     //redirect url will be change .
@@ -381,6 +406,15 @@ export const cancelPayment = () => async (req, res) => {
 
   }
 };
+
+/**
+ *This function is used for ipn.
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const ipnPayment = () => async (req, res) => {
   try {
     //

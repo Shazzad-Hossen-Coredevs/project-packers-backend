@@ -3,7 +3,7 @@ import Support from './support.schema';
 const createAllowed = new Set(['type', 'order', 'sender', 'message']);
 
 /**
- * Creates a new user in the database with the specified properties in the request body.
+ * Creates a new support chat request.
  * The 'role' property is automatically set to 'user', and the 'password' property is hashed using bcrypt.
  *
  * @param {Object} req - The request object containing the properties for the new user.
@@ -22,10 +22,7 @@ export const createChat = ({ db, ws }) => async (req, res) => {
     const chat = await db.create({ table: Support, key: { ...req.body, populate: { path: 'sender', select: ' id name avatar' } } });
     if (!chat) return res.status(400).send('Something wents wrong');
     res.status(200).send(chat);
-
-
     ws.to('supportRoom').emit('newChat', chat);
-
 
 
   }
@@ -36,7 +33,12 @@ export const createChat = ({ db, ws }) => async (req, res) => {
 };
 
 
-
+/**
+ * This function is used for accepting a support chat.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
 
 export const acceptChat = ({ db }) => async (req, res) => {
   try {
@@ -57,7 +59,12 @@ export const acceptChat = ({ db }) => async (req, res) => {
 };
 
 
-
+/**
+ * This function is used to  get all support chat list.
+ * @param {Object} req This is the request object.
+ * @param {Object} res this is the response object
+ * @returns It returns the data for success response. Otherwise it will through an error.
+ */
 export const getAll = ({ db }) => async (req, res) => {
   try {
     const chats = await db.find({ table: Support });
@@ -70,6 +77,7 @@ export const getAll = ({ db }) => async (req, res) => {
   }
 };
 
+//used for joining a room
 export const joinRoom = async ({ data, session }) => {
   try {
     session['join'](data);
@@ -81,6 +89,8 @@ export const joinRoom = async ({ data, session }) => {
   }
 
 };
+
+//Used for leave from a room
 export const leaveRoom = async ({ data, session }) => {
   try {
     session['leave'](data);

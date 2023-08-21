@@ -1,6 +1,14 @@
 import Refund from './refund.schema';
 import Order from '../order/order.schema';
 import SSLCommerzPayment from 'sslcommerz-lts';
+/**
+ * This function is used to create a refund request.
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const refundReq = ({ db }) => async (req, res) => {
   try {
     if (!req.body.id || !req.body.reason) return res.status(400).send('Missing order id or reason in request body');
@@ -15,7 +23,14 @@ export const refundReq = ({ db }) => async (req, res) => {
 
   }
 };
-
+/**
+ * This function is used to get all refund request.
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const refundList = ({ db }) => async (req, res) => {
   try {
     const refund = await db.find({ table: Refund, key: { populate: { path: 'order', populate: { path: 'user products.product', select: 'name email phone shippingAddress _id status stock thumbnails desc price link from whereToBuy tax fee category subCategory' } } } });
@@ -29,6 +44,14 @@ export const refundList = ({ db }) => async (req, res) => {
   }
 };
 
+/**
+ * This function is used to update refund request status.
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const updateRefund = ({ db }) => async (req, res) => {
   try {
     if (!req.body.id || !req.body.status) return res.status(400).send('Id or status missing in request body');
@@ -49,6 +72,15 @@ export const updateRefund = ({ db }) => async (req, res) => {
 
   }
 };
+
+/**
+ * This function is used to give refund to the user
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 
 export const initiateRefund = ({ db, settings }) => async (req, res) => {
   try {
@@ -72,12 +104,8 @@ export const initiateRefund = ({ db, settings }) => async (req, res) => {
       await db.save(refund);
       return res.status(200).send(refund)
 
-
     }
     return res.status(400).send('Refund already done for this Order.');
-
-
-
 
   } catch (error) {
     console.log(error);

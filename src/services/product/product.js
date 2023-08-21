@@ -16,21 +16,21 @@ export default function product() {
    */
   this.route.get('/product', getProducts(this));
   /**
-   * POST /user
-   * @description This route is used to create a product.
+   * GET /product/:id
+   * @description This route is used to get a single product details.
    * @request {Object} -product details object.
    * @response {oblect} - acknowledgement true.
    */
   this.route.get('/product/:id', getSingleProduct(this));
   /**
-   * POST /user
+   * PATCH /product/:id
    * @description This route is used to update a product info.
    * @request {Object} -product details object.
    * @response {oblect} - acknowledgement true.
    */
   this.route.patch('/product/:id', updateProduct(this));
   /**
-   * POST /user
+   * POST /product/:id
    * @description This route is used to delete a product.
    * @request {Object} -product details object.
    * @response {oblect} - acknowledgement true.

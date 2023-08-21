@@ -122,7 +122,7 @@ export default function user() {
  * @response {Object} 200 - the new user.
  */
   this.route.get('/user/google/callback', passport.authenticate('google', {
-    successRedirect: 'http://localhost:5173/',
+    successRedirect: 'http://localhost:5173/success',
     failureRedirect: 'http://localhost:5173/failed'
   }));
   /**
@@ -137,7 +137,7 @@ export default function user() {
  * @response {Object} 200 - the new user.
  */
   this.route.get('/user/facebook/callback', passport.authenticate('facebook', {
-    successRedirect: 'http://localhost:5173/',
+    successRedirect: 'http://localhost:5173/success',
     failureRedirect: 'http://localhost:5173/failed'
   }));
   /**

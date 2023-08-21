@@ -32,7 +32,7 @@ export const addProduct = ({ db, imageUp }) => async (req, res) => {
     db.create({ table: Product, key: { ...req.body, whereToBuy } })
       .then(async product => {
         if (!product) {
-          return res.status(400).send({ message: 'Something Wents Wrong' });
+          return res.status(400).send('Something Wents Wrong');
         }
         const data = await db.save(product);
         res.status(200).send(data);
@@ -49,7 +49,7 @@ export const addProduct = ({ db, imageUp }) => async (req, res) => {
 
 
 /**
- * Creates a new product in the database with the specified properties in the request body.
+ * This function is used to get all products.
  *
  * @param {Object} req - The request object containing the properties for the new user.
  * @param {Object} db - The database object for interacting with the database.
@@ -64,7 +64,7 @@ export const getProducts = ({ db }) => async (req, res) => {
     db.find({ table: Product, key: { query: req.query, allowedQuery: allowedQuery, paginate: req.query.paginate === 'true', populate:{ path: 'category'} } })
       .then(async product => {
         if (!product) {
-          return res.status(400).send({ message: 'Something Wents Wrong' });
+          return res.status(400).send( 'Something Wents Wrong');
         }
 
         res.status(200).send(product);
@@ -79,9 +79,9 @@ export const getProducts = ({ db }) => async (req, res) => {
   }
 };
 /**
- * Creates a new product in the database with the specified properties in the request body.
+ * This function is used to get a single product details.
  *
- * @param {Object} req - The request object containing the properties for the new user.
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
  * @param {Object} db - The database object for interacting with the database.
  * @returns {Object} acknowledgement: true
  * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
@@ -93,7 +93,7 @@ export const getSingleProduct = ({ db }) => async (req, res) => {
     db.findOne({ table: Product, key: { id: req.params.id } })
       .then(async (product) => {
         if (!product) {
-          return res.status(400).send({ error: true, message: 'Product not found' });
+          return res.status(400).send('Product not found');
         }
 
         res.status(200).send(product);
@@ -108,7 +108,14 @@ export const getSingleProduct = ({ db }) => async (req, res) => {
   }
 };
 
-
+/**
+ * This function is used to update a specific product details.
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const updateProduct = ({ db, imageUp }) => async (req, res) => {
 
   try {
@@ -129,7 +136,7 @@ export const updateProduct = ({ db, imageUp }) => async (req, res) => {
     db.findOne({ table: Product, key: { id: req.params.id } })
       .then(async product => {
         if (!product) {
-          return res.status(400).send({ message: 'Something Wents Wrong' });
+          return res.status(400).send('Something Wents Wrong');
         }
         Object.keys(req.body).forEach((k) => (product[k] = req.body[k]));
         await db.save(product);
@@ -145,6 +152,14 @@ export const updateProduct = ({ db, imageUp }) => async (req, res) => {
 
 };
 
+/**
+ * This function is used to delete a single product
+ *
+ * @param {Object} req - The request object containing the properties for the new product{name,thumbnails[],desc,price,from,whereToBuy,develeryTime,category,subCategory}.
+ * @param {Object} db - The database object for interacting with the database.
+ * @returns {Object} acknowledgement: true
+ * @throws {Error} If the request body includes properties other than those allowed or if there is an error during the database operation.
+ */
 export const deleteProduct = ({ db }) => async (req, res) => {
   try {
     const product = await db.remove({ table: Product, key: { id: req.params.id } });
@@ -155,14 +170,3 @@ export const deleteProduct = ({ db }) => async (req, res) => {
     res.status(500).send('Something went wrong.');
   }
 };
-
-export const relatedProducts = ({ db }) => async (req, res) => {
-  try {
-    console.log(req.body)
-
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send('Something wents wrong');
-
-  }
-}
